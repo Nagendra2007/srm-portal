@@ -50,8 +50,6 @@ router.get('/session', sessionLimiter, async (req, res) => {
 router.post('/login', loginLimiter, async (req, res) => {
   const { username, password } = req.body || {}
   let { captchaCode } = req.body || {}
-  console.log(username , password);
-
   // FIX: only truthiness was checked, so a JSON body of {username:{},
   // password:[]} reached URLSearchParams and stringified into garbage.
   if (typeof username !== 'string' || typeof password !== 'string' || !username.trim() || !password) {
