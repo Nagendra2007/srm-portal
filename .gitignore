@@ -1,0 +1,5 @@
+# Dependencies (re-created with npm install)
+node_modules/
+
+# Environment files with passwords or API keys
+.env
