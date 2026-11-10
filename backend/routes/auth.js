@@ -5,7 +5,8 @@ import {
   setSessionUsername,
   deleteClientSession
 } from '../services/clientSessionStore.js'
-import { solveCaptcha, submitLogin, getWorker } from '../services/srmPortalService.js'
+import { solveCaptcha, submitLogin } from '../services/srmPortalService.js'
+import { warmUpCaptchaSolver } from '../services/captchaSolver.js'
 import { clearReportCache } from '../services/reportCache.js'
 import { rateLimit } from '../middleware/rateLimit.js'
 
@@ -29,8 +30,8 @@ router.get('/session', sessionLimiter, async (req, res) => {
     const { sessionId, client } = createClientSession()
     const session = getClientSession(sessionId)
 
-    // Warm the OCR worker while the user is still typing.
-    getWorker().catch((err) => console.warn('Worker background warm up warning:', err.message))
+    // Warm the captcha solver while the user is still typing.
+    warmUpCaptchaSolver().catch((err) => console.warn('Captcha solver warm up warning:', err.message))
 
     try {
       await client.get(LOGIN_PAGE_URL, { timeout: 5000 })
@@ -78,9 +79,17 @@ router.post('/login', loginLimiter, async (req, res) => {
   // FIX: rotate the session id on every login attempt instead of reusing the
   // caller-supplied one. Re-keying costs nothing and removes the window where
   // a pre-seeded X-Client-Session value could be ridden after a real login.
+  //
+  // Only a session that is still anonymous or already belongs to this same
+  // account is replaced. The browser keeps one session per saved profile, so
+  // logging in as B while A's session id is in the header must leave A's
+  // session alive for switching back.
   const previousSessionId = req.headers['x-client-session']
   if (typeof previousSessionId === 'string' && previousSessionId) {
-    deleteClientSession(previousSessionId)
+    const previous = getClientSession(previousSessionId)
+    if (previous && (!previous.username || previous.username === username)) {
+      deleteClientSession(previousSessionId)
+    }
   }
 
   const { sessionId } = createClientSession()
@@ -102,9 +111,9 @@ router.post('/login', loginLimiter, async (req, res) => {
       try {
         captchaCode = await solveCaptcha(session.client)
       } catch (captchaErr) {
-        console.warn('OCR captcha solve failed:', captchaErr.message)
+        console.warn('Captcha solve failed:', captchaErr.message)
         // FIX: this used to fall back to the literal string 'SRM', which can
-        // never be the right answer — so an OCR outage surfaced to the student
+        // never be the right answer — so a solver outage surfaced to the student
         // as "invalid credentials" and sent a doomed request to SRM anyway.
         deleteClientSession(sessionId)
         return res.status(503).json({

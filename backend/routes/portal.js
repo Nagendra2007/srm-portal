@@ -16,6 +16,12 @@ import {
   REPORT_IDS
 } from '../services/srmPortalService.js'
 import { getCachedReport, saveReportCache } from '../services/reportCache.js'
+import {
+  fetchFeedbackSubjects,
+  submitFeedback,
+  getRandomComment,
+  isValidComment
+} from '../services/feedbackService.js'
 
 const router = express.Router()
 
@@ -245,6 +251,63 @@ router.get('/att', async (req, res) => {
     res.status(200).json(parseTodayAttendance(html))
   } catch (error) {
     handleRouteError(res, error, "Failed to fetch today's attendance status")
+  }
+})
+
+/* --------------------------------------------------------------------------
+   SUBJECT-WISE FEEDBACK
+   All on the student's own session. /subjects lists the subjects still
+   awaiting feedback, /comment hands out a random canned comment, and /submit
+   posts the chosen rating + comment for the chosen subjects.
+   -------------------------------------------------------------------------- */
+router.get('/feedback/subjects', async (req, res) => {
+  const session = requireSession(req, res)
+  if (!session) return
+
+  try {
+    const { subjects } = await fetchFeedbackSubjects(session.client)
+    noStore(res)
+    res.json({ success: true, subjects })
+  } catch (error) {
+    handleRouteError(res, error, 'Failed to load feedback subjects')
+  }
+})
+
+router.get('/feedback/comment', (req, res) => {
+  noStore(res)
+  res.json({ success: true, comment: getRandomComment() })
+})
+
+router.post('/feedback/submit', async (req, res) => {
+  const session = requireSession(req, res)
+  if (!session) return
+
+  const { comment, optionNo, selectedSubjectIds } = req.body || {}
+
+  if (typeof comment !== 'string') {
+    return res.status(400).json({ success: false, message: 'A comment is required' })
+  }
+
+  const [valid, message] = isValidComment(comment)
+  if (!valid) {
+    return res.status(400).json({ success: false, message })
+  }
+
+  if (selectedSubjectIds !== undefined &&
+      (!Array.isArray(selectedSubjectIds) || selectedSubjectIds.some((id) => typeof id !== 'string'))) {
+    return res.status(400).json({ success: false, message: 'Invalid subject selection' })
+  }
+
+  try {
+    const result = await submitFeedback(session.client, {
+      comment,
+      optionNo: optionNo ?? 5,
+      selectedSubjectIds
+    })
+    noStore(res)
+    res.json(result)
+  } catch (error) {
+    handleRouteError(res, error, 'Failed to submit feedback')
   }
 })
 

@@ -1,10 +1,5 @@
-import { createWorker } from 'tesseract.js'
 import * as cheerio from 'cheerio'
-import fs from 'fs'
-import path from 'path'
-import { fileURLToPath } from 'url'
-
-const __dirname = path.dirname(fileURLToPath(import.meta.url))
+import { solveCaptchaImage } from './captchaSolver.js'
 
 export const SRM_HOST = 'student.srmap.edu.in'
 const SRM_BASE_URL = `https://${SRM_HOST}/srmapstudentcorner/`
@@ -396,170 +391,14 @@ export const parseTodayAttendance = (html) => {
 }
 
 /* --------------------------------------------------------------------------
-   OCR WORKER
-   FIX: the old version cached the *worker*, not the promise, so two logins
-   arriving together both saw null and each built a Tesseract worker. Every
-   duplicate loaded its own language model and never got freed.
-
-   FIX: langPath was process.cwd(), which differs between `npm start` at the
-   repo root and `npm start` inside backend/ — so whether OCR worked at all
-   depended on which directory you launched from.
-
-   FIX: the repo has no eng.traineddata, and hardcoding langPath to a local
-   directory made that a hard crash (ENOENT) rather than a recoverable miss.
-   tesseract.js only falls back to its jsdelivr CDN when langPath is left
-   UNSET, so we now set it only if a real local file is present. cachePath
-   makes the first download persist, so run one needs the network and every
-   run after it does not.
-
-   FIX: tesseract.js v7 does `throw Error(data)` from inside a MessagePort
-   event handler when a worker job rejects and no errorHandler was supplied
-   (node_modules/tesseract.js/src/createWorker.js:217). That throw escapes
-   every try/catch here and kills the process. Supplying errorHandler routes
-   the failure into our promise instead, so a missing or corrupt model is a
-   503 from /api/login rather than a crashed server.
+   CAPTCHA
+   Solved locally by the TFLite model in captchaSolver.js (this replaced the
+   Tesseract OCR worker).
    -------------------------------------------------------------------------- */
-const TESSDATA_DIR = process.env.TESSDATA_PATH || path.resolve(__dirname, '../..')
-
-// tesseract.js reads/writes the *decompressed* model as `<dir>/eng.traineddata`.
-const localModelPath = path.join(TESSDATA_DIR, 'eng.traineddata')
-
-// FIX: with no local model AND an unreachable CDN, createWorker() never
-// settles — it just waits on the socket. Verified: a worker build with egress
-// blocked hung past 120s with no error. An unbounded wait here stalls the
-// login request behind it, so cap it and surface a 503 instead.
-const OCR_INIT_TIMEOUT_MS = Number(process.env.OCR_INIT_TIMEOUT_MS || 60_000)
-
-// FIX: when createWorker() fails, tesseract.js gives us no handle to the
-// worker thread it already spawned, so we cannot terminate it — and it keeps
-// the event loop alive. Verified: a bare script with a failed init never
-// exited. (server.js force-exits on shutdown, so this only leaks while
-// running.) Retrying on every login would therefore add a dead thread per
-// attempt and hammer the CDN, so hold a short cooldown and fail fast instead.
-const OCR_FAIL_COOLDOWN_MS = Number(process.env.OCR_FAIL_COOLDOWN_MS || 60_000)
-let lastOcrFailureAt = 0
-
-const hasLocalModel = () => {
-  try {
-    return fs.statSync(localModelPath).size > 0
-  } catch {
-    return false
-  }
-}
-
-let workerPromise = null
-
-export const getWorker = () => {
-  if (!workerPromise) {
-    const sinceFailure = Date.now() - lastOcrFailureAt
-
-    if (lastOcrFailureAt && sinceFailure < OCR_FAIL_COOLDOWN_MS) {
-      const wait = Math.ceil((OCR_FAIL_COOLDOWN_MS - sinceFailure) / 1000)
-      const e = new Error(
-        `OCR is unavailable (last init failed). Retrying in ${wait}s. ` +
-        `Place eng.traineddata at ${localModelPath} to fix this permanently.`
-      )
-      e.statusCode = 503
-      return Promise.reject(e)
-    }
-
-    workerPromise = (async () => {
-      const useLocal = hasLocalModel()
-
-      if (!useLocal) {
-        console.log(
-          `[ocr] no model at ${localModelPath} — downloading eng.traineddata ` +
-          `once from the tesseract.js CDN and caching it there. Drop the file ` +
-          `in yourself to skip the network entirely.`
-        )
-      }
-
-      const creating = createWorker('eng', 1, {
-        // Only pin langPath when the file really exists. Left unset,
-        // tesseract.js downloads from cdn.jsdelivr.net instead of throwing.
-        ...(useLocal ? { langPath: TESSDATA_DIR, gzip: false } : {}),
-        // Persist the model so only the first run touches the network.
-        cachePath: TESSDATA_DIR,
-        // Without this, a load failure throws from an event handler and
-        // takes the whole process down. See the FIX note above.
-        errorHandler: (err) => {
-          console.error('[ocr] tesseract worker error:', err?.message || err)
-        },
-        parameters: {
-          load_system_dawg: '0',
-          load_freq_dawg: '0'
-        }
-      })
-
-      let timedOut = false
-
-      // If we give up waiting, don't leak the worker that eventually arrives.
-      creating.then(
-        (w) => { if (timedOut) Promise.resolve(w.terminate()).catch(() => {}) },
-        () => {}
-      )
-
-      let timer
-      const worker = await Promise.race([
-        creating,
-        new Promise((_, reject) => {
-          timer = setTimeout(() => {
-            timedOut = true
-            const e = new Error(
-              `OCR init timed out after ${OCR_INIT_TIMEOUT_MS}ms. ` +
-              (useLocal
-                ? `Model at ${localModelPath} may be corrupt.`
-                : `Could not reach the tesseract.js CDN — place eng.traineddata at ${localModelPath}.`)
-            )
-            e.statusCode = 503
-            reject(e)
-          }, OCR_INIT_TIMEOUT_MS)
-          timer.unref?.()
-        })
-      ]).finally(() => clearTimeout(timer))
-
-      try {
-        await worker.setParameters({
-          tessedit_char_whitelist: '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ',
-          tessedit_pageseg_mode: '7'
-        })
-      } catch (e) {
-        console.warn('Tesseract param config warning:', e.message)
-      }
-
-      lastOcrFailureAt = 0
-      return worker
-    })().catch((err) => {
-      // Don't cache a rejected promise — otherwise one cold-start failure
-      // permanently disables captcha solving for the process lifetime.
-      workerPromise = null
-      lastOcrFailureAt = Date.now()
-      throw err
-    })
-  }
-
-  return workerPromise
-}
-
-export const terminateWorker = async () => {
-  if (!workerPromise) return
-  try {
-    const worker = await workerPromise
-    await worker.terminate()
-  } catch {
-    /* already gone */
-  } finally {
-    workerPromise = null
-  }
-}
-
 export const solveCaptcha = async (client) => {
   const captchaResponse = await client.get(CAPTCHA_URL, { responseType: 'arraybuffer' })
 
-  const worker = await getWorker()
-  const { data } = await worker.recognize(captchaResponse.data)
-
-  return data.text.replace(/[^a-zA-Z0-9]/g, '').trim()
+  return solveCaptchaImage(captchaResponse.data)
 }
 
 /* --------------------------------------------------------------------------

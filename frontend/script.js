@@ -156,6 +156,33 @@ function hideProfileSwitchPopup() {
       try { localStorage.removeItem(accountSecretKey(username)); } catch (e) {}
     };
 
+    /* Per-account backend session ids. Each saved profile keeps the session
+       it last logged in with, so switching profiles can pick that session
+       back up instead of logging in to SRM again. An entry only goes away on
+       logout, on removing the profile, or when a fresh login replaces it. */
+    const getAccountSessions = () => {
+      try {
+        const parsed = JSON.parse(localStorage.getItem('accountSessions') || '{}');
+        return parsed && typeof parsed === 'object' && !Array.isArray(parsed) ? parsed : {};
+      } catch (e) { return {}; }
+    };
+    const getAccountSession = (username) => {
+      const id = username ? getAccountSessions()[username] : '';
+      return typeof id === 'string' ? id : '';
+    };
+    const setAccountSession = (username, id) => {
+      if (!username || !id) return;
+      const sessions = getAccountSessions();
+      sessions[username] = id;
+      try { localStorage.setItem('accountSessions', JSON.stringify(sessions)); } catch (e) {}
+    };
+    const clearAccountSession = (username) => {
+      if (!username) return;
+      const sessions = getAccountSessions();
+      delete sessions[username];
+      try { localStorage.setItem('accountSessions', JSON.stringify(sessions)); } catch (e) {}
+    };
+
     /* One-time cleanup for anyone upgrading: purge cleartext passwords this
        app already wrote to disk, otherwise the old values just sit there. */
     (function purgeLegacyPlaintextPasswords() {
@@ -215,6 +242,8 @@ function hideProfileSwitchPopup() {
     const currentResultsSection = document.getElementById('currentResultsSection');
     const currentResultsContent = document.getElementById('currentResultsContent');
     const currentResultsSgpaBadge = document.getElementById('currentResultsSgpaBadge');
+    const feedbackSection = document.getElementById('feedbackSection');
+    const feedbackContent = document.getElementById('feedbackContent');
 
     let currentTimetableData = null;
     let currentCoursesList = [];
@@ -228,7 +257,20 @@ function hideProfileSwitchPopup() {
       markAttendanceSection.style.display = 'none';
       internalMarksSection.style.display = 'none';
       currentResultsSection.style.display = 'none';
+      feedbackSection.style.display = 'none';
       if (activeSec) activeSec.style.display = 'block';
+
+      // Highlight the matching tab in the bottom bar and keep it in view.
+      document.querySelectorAll('.bottom-nav-item').forEach((tab) => {
+        const isActive = !!activeSec && tab.dataset.section === activeSec.id;
+        tab.classList.toggle('active', isActive);
+        if (isActive) {
+          tab.setAttribute('aria-current', 'page');
+          tab.scrollIntoView({ block: 'nearest', inline: 'nearest' });
+        } else {
+          tab.removeAttribute('aria-current');
+        }
+      });
     };
 
     /* --------------------------------------------------------------------------
@@ -243,7 +285,9 @@ function hideProfileSwitchPopup() {
       graduation: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 9l10-5 10 5-10 5z"/><path d="M6 11v5c0 1.5 3 3 6 3s6-1.5 6-3v-5"/></svg>',
       phone: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 4h4l2 5-2.5 1.5a12 12 0 006 6L16 14l5 2v4c0 1-1 2-2 2A16 16 0 013 6c0-1 1-2 2-2z"/></svg>',
       family: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="7" r="3"/><path d="M2 20c0-3.5 3-5.5 7-5.5s7 2 7 5.5"/><circle cx="17" cy="8" r="2.5"/><path d="M22 20c0-2.5-1.8-4.3-4-5"/></svg>',
-      globe: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.5 2.5 4 5.7 4 9s-1.5 6.5-4 9c-2.5-2.5-4-5.7-4-9s1.5-6.5 4-9z"/></svg>'
+      globe: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.5 2.5 4 5.7 4 9s-1.5 6.5-4 9c-2.5-2.5-4-5.7-4-9s1.5-6.5 4-9z"/></svg>',
+      mail: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><polyline points="3 7 12 13 21 7"/></svg>',
+      group: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>'
     };
 
     const getFieldIcon = (label) => {
@@ -253,9 +297,10 @@ function hideProfileSwitchPopup() {
       if (lower.includes('register') || lower.includes('reg')) return FIELD_ICONS.file;
       if (lower.includes('institution') || lower.includes('college') || lower.includes('campus')) return FIELD_ICONS.building;
       if (lower.includes('semester') || lower.includes('d.o.b') || lower.includes('dob') || lower.includes('date')) return FIELD_ICONS.calendar;
-      if (lower.includes('program') || lower.includes('section') || lower.includes('batch')) return FIELD_ICONS.folder;
-      if (lower.includes('specialization') || lower.includes('branch')) return FIELD_ICONS.graduation;
-      if (lower.includes('contact') || lower.includes('email') || lower.includes('phone') || lower.includes('mobile')) return FIELD_ICONS.phone;
+      if (lower.includes('section') || lower.includes('batch')) return FIELD_ICONS.group;
+      if (lower.includes('program') || lower.includes('specialization') || lower.includes('branch')) return FIELD_ICONS.graduation;
+      if (lower.includes('mail')) return FIELD_ICONS.mail;
+      if (lower.includes('contact') || lower.includes('phone') || lower.includes('mobile')) return FIELD_ICONS.phone;
       if (lower.includes('access') || lower.includes('status')) return FIELD_ICONS.globe;
       return FIELD_ICONS.file;
     };
@@ -583,8 +628,8 @@ function hideProfileSwitchPopup() {
       let cacheIndicator = '';
       if (isCached) {
         cacheIndicator = `
-          <div style="margin-bottom:12px;padding:8px 12px;background:var(--stamp-glow, rgba(225,29,72,0.05));border:1px dashed var(--header-border);border-radius:6px;display:flex;align-items:center;gap:8px;font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--ink-muted);">
-            <span style="display:inline-block;width:6px;height:6px;background:var(--stamp-red, #e11d48);border-radius:50%;"></span>
+          <div style="margin-bottom:12px;padding:8px 12px;background:var(--accent-soft);border:1px dashed var(--header-border);border-radius:6px;display:flex;align-items:center;gap:8px;font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--ink-muted);">
+            <span style="display:inline-block;width:6px;height:6px;background:var(--accent);border-radius:50%;"></span>
             <span>[Last-Known Cached Data]</span>
           </div>
         `;
@@ -594,30 +639,145 @@ function hideProfileSwitchPopup() {
 
     /* --------------------------------------------------------------------------
        5. ATTENDANCE CARDS RENDERER
+       Toolbar (What If? / Today / sort) on top, one card per subject below.
+       Each card has two planners: "Plan Bunks" (what happens if I skip N
+       classes) and "Future" (what happens if I attend N more).
+
+       All of the view state lives in attendanceView, and every interaction
+       just re-renders from it — so a background data refresh never resets
+       what the student has open.
        -------------------------------------------------------------------------- */
+    const MIN_ATTENDANCE = 75;
+    const ATT_SORTS = ['default', 'low', 'high'];
+    const ATT_SORT_LABELS = { default: 'Portal order', low: 'Lowest first', high: 'Highest first' };
+
+    const attendanceView = {
+      sort: 'default',
+      panel: null,              // null | 'whatif' | 'today'
+      whatIf: { attend: 0, miss: 0 },
+      todayHtml: null,          // null = not loaded yet
+      planner: null             // null | { code, mode: 'bunk' | 'future', n }
+    };
+
+    const attendancePct = (present, total) => (total > 0 ? (present / total) * 100 : 0);
+    const fmtPct = (value) => `${value.toFixed(2)}%`;
+
+    // Classes that can still be missed while staying at or above the minimum.
+    const classesCanSkip = (present, total) =>
+      Math.max(0, Math.floor(present / (MIN_ATTENDANCE / 100) - total));
+
+    // Classes that must be attended in a row to get back to the minimum.
+    const classesNeeded = (present, total) => {
+      const min = MIN_ATTENDANCE / 100;
+      return Math.max(0, Math.ceil((min * total - present) / (1 - min)));
+    };
+
+    const attStepper = (field, value, label) => `
+      <div class="att-stepper">
+        <span class="att-stepper-label">${label}</span>
+        <div class="att-stepper-controls">
+          <button class="att-step-btn" type="button" data-att-step="${field}" data-delta="-1" aria-label="Decrease">&minus;</button>
+          <span class="att-stepper-value">${value}</span>
+          <button class="att-step-btn" type="button" data-att-step="${field}" data-delta="1" aria-label="Increase">+</button>
+        </div>
+      </div>`;
+
+    const renderAttendancePlanner = (subject) => {
+      const planner = attendanceView.planner;
+      if (!planner || planner.code !== subject.code) return '';
+
+      const isBunk = planner.mode === 'bunk';
+      const present = subject.present + (isBunk ? 0 : planner.n);
+      const total = subject.total + planner.n;
+      const projected = attendancePct(present, total);
+      const isSafe = projected >= MIN_ATTENDANCE;
+
+      let hint;
+      if (isBunk) {
+        const maxSkip = classesCanSkip(subject.present, subject.total);
+        hint = maxSkip > 0
+          ? `You can skip up to ${maxSkip} class${maxSkip === 1 ? '' : 'es'} and stay at ${MIN_ATTENDANCE}%.`
+          : `No room to skip — you are at or below ${MIN_ATTENDANCE}%.`;
+      } else {
+        const needed = classesNeeded(subject.present, subject.total);
+        hint = needed > 0
+          ? `Attend the next ${needed} class${needed === 1 ? '' : 'es'} in a row to reach ${MIN_ATTENDANCE}%.`
+          : `You are already above ${MIN_ATTENDANCE}%.`;
+      }
+
+      return `
+        <div class="att-planner">
+          ${attStepper('planner', planner.n, isBunk ? 'Classes to skip' : 'Classes to attend')}
+          <div class="att-planner-result">
+            <span>Attendance becomes</span>
+            <span class="subject-percent ${isSafe ? 'good' : 'low'}">${fmtPct(projected)}</span>
+          </div>
+          <p class="att-planner-hint">${hint}</p>
+        </div>`;
+    };
+
+    const renderAttendancePanel = (subjects) => {
+      if (attendanceView.panel === 'today') {
+        return `<div class="att-panel">${attendanceView.todayHtml
+          || '<div class="today-card"><p class="today-card-empty">Loading today\'s attendance status...</p></div>'}</div>`;
+      }
+
+      if (attendanceView.panel !== 'whatif') return '';
+
+      const { attend, miss } = attendanceView.whatIf;
+      const rows = subjects.map((subject) => {
+        const projected = attendancePct(subject.present + attend, subject.total + attend + miss);
+        return `
+          <div class="att-whatif-row">
+            <span class="att-whatif-name">${esc(subject.description)}</span>
+            <span class="att-whatif-from">${subject.attendancePercent}%</span>
+            <span class="subject-percent ${projected >= MIN_ATTENDANCE ? 'good' : 'low'}">${fmtPct(projected)}</span>
+          </div>`;
+      }).join('');
+
+      return `
+        <div class="att-panel">
+          <p class="att-panel-title">What if, in every subject, I&hellip;</p>
+          <div class="att-whatif-steppers">
+            ${attStepper('attend', attend, 'Attend the next')}
+            ${attStepper('miss', miss, 'Miss the next')}
+          </div>
+          <div class="att-whatif-rows">${rows}</div>
+        </div>`;
+    };
+
     const renderAttendance = (subjects) => {
       if (!subjects || subjects.length === 0) {
         attendanceContent.innerHTML = '<p style="font-family:\'IBM Plex Mono\',monospace;font-size:13px;color:var(--ink-muted);text-align:center;padding:20px;">No attendance data found.</p>';
         return;
       }
 
-      const cardsHtml = subjects.map((subject) => {
-        const isGood = subject.attendancePercent >= 75;
+      const sorted = [...subjects];
+      if (attendanceView.sort === 'low') sorted.sort((a, b) => a.attendancePercent - b.attendancePercent);
+      if (attendanceView.sort === 'high') sorted.sort((a, b) => b.attendancePercent - a.attendancePercent);
+
+      const cardsHtml = sorted.map((subject) => {
+        const isGood = subject.attendancePercent >= MIN_ATTENDANCE;
         const statusClass = isGood ? 'good' : 'low';
         const barWidth = Math.min(100, Math.max(0, subject.attendancePercent));
-        const skipText = subject.canSkip >= 0 ? `${subject.canSkip} Classes` : `${Math.abs(subject.canSkip)} Needed`;
+        const needed = classesNeeded(subject.present, subject.total);
+        const planner = attendanceView.planner;
+        const openMode = planner && planner.code === subject.code ? planner.mode : null;
 
         return `
-          <div class="subject-card">
+          <div class="subject-card" data-code="${esc(subject.code)}">
             <div class="subject-card-header">
-              <span class="subject-name">${esc(subject.description)}</span>
+              <div class="subject-title">
+                <span class="subject-name">${esc(subject.description)}</span>
+                <span class="subject-code">${esc(subject.code)}</span>
+              </div>
               <span class="subject-percent ${statusClass}">${subject.attendancePercent}%</span>
             </div>
             <div class="progress-track">
               <div class="progress-fill ${statusClass}" style="width:${barWidth}%"></div>
             </div>
             <div class="subject-minmax">
-              <span>Required: 75%</span>
+              <span>Min: ${MIN_ATTENDANCE}%</span>
               <span>Current: ${subject.attendancePercent}%</span>
             </div>
             <div class="subject-stats">
@@ -634,10 +794,15 @@ function hideProfileSwitchPopup() {
                 <div class="stat-value">${subject.total}</div>
               </div>
               <div class="stat-box">
-                <div class="stat-label">${subject.canSkip >= 0 ? 'Can Skip' : 'Shortage'}</div>
-                <div class="stat-value ${subject.canSkip >= 0 ? 'present' : 'absent'}">${skipText}</div>
+                <div class="stat-label">${isGood ? 'Can Skip' : 'Must Attend'}</div>
+                <div class="stat-value ${isGood ? '' : 'absent'}">${isGood ? subject.canSkip : needed}</div>
               </div>
             </div>
+            <div class="subject-actions">
+              <button class="att-action-btn${openMode === 'bunk' ? ' active' : ''}" type="button" data-att-plan="bunk" aria-expanded="${openMode === 'bunk'}">Plan Bunks</button>
+              <button class="att-action-btn${openMode === 'future' ? ' active' : ''}" type="button" data-att-plan="future" aria-expanded="${openMode === 'future'}">Future</button>
+            </div>
+            ${renderAttendancePlanner(subject)}
           </div>
         `;
       }).join('');
@@ -645,15 +810,89 @@ function hideProfileSwitchPopup() {
       let cacheIndicator = '';
       if (subjects.isCached) {
         cacheIndicator = `
-          <div style="margin-bottom:12px;padding:8px 12px;background:var(--stamp-glow, rgba(225,29,72,0.05));border:1px dashed var(--header-border);border-radius:6px;display:flex;align-items:center;gap:8px;font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--ink-muted);">
-            <span style="display:inline-block;width:6px;height:6px;background:var(--stamp-red, #e11d48);border-radius:50%;"></span>
+          <div style="margin-bottom:12px;padding:8px 12px;background:var(--accent-soft);border:1px dashed var(--header-border);border-radius:6px;display:flex;align-items:center;gap:8px;font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--ink-muted);">
+            <span style="display:inline-block;width:6px;height:6px;background:var(--accent);border-radius:50%;"></span>
             <span>[Last-Known Cached Data]</span>
           </div>
         `;
       }
 
-      attendanceContent.innerHTML = cacheIndicator + `<div class="attendance-grid">${cardsHtml}</div>`;
+      const toolbar = `
+        <div class="att-toolbar">
+          <button class="att-tool-btn${attendanceView.panel === 'whatif' ? ' active' : ''}" type="button" data-att-tool="whatif" aria-pressed="${attendanceView.panel === 'whatif'}">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="2" width="16" height="20" rx="2"/><line x1="8" y1="6" x2="16" y2="6"/><line x1="8" y1="11" x2="8" y2="11"/><line x1="12" y1="11" x2="12" y2="11"/><line x1="16" y1="11" x2="16" y2="11"/><line x1="8" y1="15" x2="8" y2="15"/><line x1="12" y1="15" x2="12" y2="15"/><line x1="16" y1="15" x2="16" y2="18"/><line x1="8" y1="18" x2="12" y2="18"/></svg>
+            What If?
+          </button>
+          <button class="att-tool-btn${attendanceView.panel === 'today' ? ' active' : ''}" type="button" data-att-tool="today" aria-pressed="${attendanceView.panel === 'today'}">Today</button>
+          <button class="att-tool-btn icon-only${attendanceView.sort !== 'default' ? ' active' : ''}" type="button" data-att-tool="sort" title="Sort: ${ATT_SORT_LABELS[attendanceView.sort]}" aria-label="Sort: ${ATT_SORT_LABELS[attendanceView.sort]}">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="7 4 7 20"/><polyline points="3 8 7 4 11 8"/><polyline points="17 20 17 4"/><polyline points="13 16 17 20 21 16"/></svg>
+          </button>
+        </div>
+        ${attendanceView.sort !== 'default' ? `<p class="att-sort-note">Sorted: ${ATT_SORT_LABELS[attendanceView.sort]}</p>` : ''}`;
+
+      attendanceContent.innerHTML = cacheIndicator + toolbar + renderAttendancePanel(sorted)
+        + `<div class="attendance-grid">${cardsHtml}</div>`;
     };
+
+    const loadAttendanceTodayPanel = async () => {
+      try {
+        const res = await fetch(`${API_BASE}/api/att`, {
+          headers: { 'X-Client-Session': sessionId }
+        });
+        if (!await checkResponseAuth(res)) return;
+        attendanceView.todayHtml = res.ok
+          ? renderTodayAttendanceStatus(await res.json())
+          : '<div class="today-card"><p class="today-card-empty">Could not load today\'s attendance.</p></div>';
+      } catch (err) {
+        attendanceView.todayHtml = '<div class="today-card"><p class="today-card-empty">Could not load today\'s attendance.</p></div>';
+      }
+      if (attendanceView.panel === 'today' && currentAttendanceList) renderAttendance(currentAttendanceList);
+    };
+
+    attendanceContent.addEventListener('click', (e) => {
+      if (!currentAttendanceList) return;
+
+      const tool = e.target.closest('[data-att-tool]');
+      const plan = e.target.closest('[data-att-plan]');
+      const step = e.target.closest('[data-att-step]');
+      if (!tool && !plan && !step) return;
+
+      if (tool) {
+        const name = tool.dataset.attTool;
+        if (name === 'sort') {
+          attendanceView.sort = ATT_SORTS[(ATT_SORTS.indexOf(attendanceView.sort) + 1) % ATT_SORTS.length];
+        } else {
+          attendanceView.panel = attendanceView.panel === name ? null : name;
+          if (attendanceView.panel === 'today') {
+            // Always re-fetch on open: today's status changes during the day.
+            attendanceView.todayHtml = null;
+            loadAttendanceTodayPanel();
+          }
+        }
+      }
+
+      if (plan) {
+        const code = plan.closest('.subject-card').dataset.code;
+        const mode = plan.dataset.attPlan;
+        const current = attendanceView.planner;
+        attendanceView.planner = current && current.code === code && current.mode === mode
+          ? null
+          : { code, mode, n: 1 };
+      }
+
+      if (step) {
+        const delta = Number(step.dataset.delta);
+        const clamp = (value) => Math.max(0, Math.min(99, value + delta));
+        const field = step.dataset.attStep;
+        if (field === 'planner' && attendanceView.planner) {
+          attendanceView.planner.n = clamp(attendanceView.planner.n);
+        } else if (field === 'attend' || field === 'miss') {
+          attendanceView.whatIf[field] = clamp(attendanceView.whatIf[field]);
+        }
+      }
+
+      renderAttendance(currentAttendanceList);
+    });
 
     /* --------------------------------------------------------------------------
        6b. INTERNAL MARKS RENDERER
@@ -710,8 +949,8 @@ function hideProfileSwitchPopup() {
       let cacheIndicator = '';
       if (subjects.isCached) {
         cacheIndicator = `
-          <div style="margin-bottom:12px;padding:8px 12px;background:var(--stamp-glow, rgba(225,29,72,0.05));border:1px dashed var(--header-border);border-radius:6px;display:flex;align-items:center;gap:8px;font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--ink-muted);">
-            <span style="display:inline-block;width:6px;height:6px;background:var(--stamp-red, #e11d48);border-radius:50%;"></span>
+          <div style="margin-bottom:12px;padding:8px 12px;background:var(--accent-soft);border:1px dashed var(--header-border);border-radius:6px;display:flex;align-items:center;gap:8px;font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--ink-muted);">
+            <span style="display:inline-block;width:6px;height:6px;background:var(--accent);border-radius:50%;"></span>
             <span>[Last-Known Cached Data]</span>
           </div>
         `;
@@ -775,8 +1014,8 @@ function hideProfileSwitchPopup() {
       let cacheIndicator = '';
       if (data.isCached) {
         cacheIndicator = `
-          <div style="margin-bottom:12px;padding:8px 12px;background:var(--stamp-glow, rgba(225,29,72,0.05));border:1px dashed var(--header-border);border-radius:6px;display:flex;align-items:center;gap:8px;font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--ink-muted);">
-            <span style="display:inline-block;width:6px;height:6px;background:var(--stamp-red, #e11d48);border-radius:50%;"></span>
+          <div style="margin-bottom:12px;padding:8px 12px;background:var(--accent-soft);border:1px dashed var(--header-border);border-radius:6px;display:flex;align-items:center;gap:8px;font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--ink-muted);">
+            <span style="display:inline-block;width:6px;height:6px;background:var(--accent);border-radius:50%;"></span>
             <span>[Last-Known Cached Data]</span>
           </div>
         `;
@@ -932,8 +1171,8 @@ function hideProfileSwitchPopup() {
       let cacheIndicator = '';
       if (timetableData.isCached) {
         cacheIndicator = `
-          <div style="margin-bottom:12px;padding:8px 12px;background:var(--stamp-glow, rgba(225,29,72,0.05));border:1px dashed var(--header-border);border-radius:6px;display:flex;align-items:center;gap:8px;font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--ink-muted);">
-            <span style="display:inline-block;width:6px;height:6px;background:var(--stamp-red, #e11d48);border-radius:50%;"></span>
+          <div style="margin-bottom:12px;padding:8px 12px;background:var(--accent-soft);border:1px dashed var(--header-border);border-radius:6px;display:flex;align-items:center;gap:8px;font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--ink-muted);">
+            <span style="display:inline-block;width:6px;height:6px;background:var(--accent);border-radius:50%;"></span>
             <span>[Last-Known Cached Data]</span>
           </div>
         `;
@@ -1109,13 +1348,11 @@ function hideProfileSwitchPopup() {
        local session died of old age; most of the time it means SRM logged us
        out early and we still have a perfectly good saved password.
 
-       reconnectSession() is the single place that re-authenticates. It's
-       shared by the manual "Initiate New Session" button AND by
-       checkResponseAuth below, which now calls it automatically the instant
-       any request gets a 401 — instead of just showing the popup and
-       waiting for a click. If several panels 401 around the same time
-       (bootstrap + attendance + courses firing together), they all await
-       the same in-flight attempt instead of each starting its own login.
+       reconnectSession() is the single place that re-authenticates. It only
+       runs when the user clicks "Initiate New Session" on the popup:
+       checkResponseAuth below shows that popup on a 401 and stops there, so
+       a session is kept for as long as SRM honours it and a new SRM login
+       only ever happens on an explicit click.
        -------------------------------------------------------------------------- */
     let reconnectInFlight = null;
 
@@ -1130,8 +1367,8 @@ function hideProfileSwitchPopup() {
           throw new Error('Saved credentials not found. Please log in again.');
         }
 
-        // Reset the active session and re-execute login
-        sessionId = null;
+        // sessionId is left as-is on purpose: performLogin sends it along, so
+        // the backend drops the expired session as it creates the new one.
         await performLogin(username, password, { remember: true });
 
         // Re-load current dashboard with new active session
@@ -1145,24 +1382,16 @@ function hideProfileSwitchPopup() {
       if (res.status === 401) {
         if (!sessionId) return false;
 
-        showSessionExpiredPopup();
-
-        try {
-          await reconnectSession();
-          hideSessionExpiredPopup();
-        } catch (err) {
-          const msgEl = document.getElementById('sessionExpiredMessage');
-          if (msgEl) {
-            msgEl.textContent = `Reconnection failed: ${err.message || 'Verification failed'}. Please check your connection or log out and sign in again.`;
-            msgEl.style.color = 'var(--stamp-red)';
-          }
-          // Popup stays up with the manual button as a fallback.
+        // Several panels can 401 around the same time. Only the first one
+        // should (re)open the popup, or a later 401 would wipe an error
+        // message / in-progress state from a reconnect already under way.
+        const overlay = document.getElementById('sessionExpiredOverlay');
+        if (!reconnectInFlight && !(overlay && overlay.classList.contains('show'))) {
+          showSessionExpiredPopup();
         }
 
-        // The response that triggered this was still a 401 — the caller's
-        // current fetch has no data to use. It should treat this pass as
-        // failed and rely on the next natural refresh (or its own retry)
-        // now that the session behind it is healthy again.
+        // No login happens here — the popup's button does that. The caller's
+        // fetch has no data to use, so it treats this pass as failed.
         return false;
       }
       return true;
@@ -1176,18 +1405,15 @@ function hideProfileSwitchPopup() {
         try {
           await reconnectSession();
           hideSessionExpiredPopup();
-          // Manual click, not the silent auto-reconnect in checkResponseAuth
-          // (that one stays silent so a background 401 doesn't yank the
-          // page out from under someone mid-action). Here the user asked
-          // for this explicitly, so reload to guarantee every panel is
-          // rebuilt clean against the new session, same as profile switch.
+          // Reload to guarantee every panel is rebuilt clean against the
+          // new session, same as profile switch.
           window.location.reload();
           return;
         } catch (err) {
           const msgEl = document.getElementById('sessionExpiredMessage');
           if (msgEl) {
             msgEl.textContent = `Reconnection failed: ${err.message || 'Verification failed'}. Please check your connection or log out and sign in again.`;
-            msgEl.style.color = 'var(--stamp-red)';
+            msgEl.style.color = 'var(--low-red)';
           }
         } finally {
           sessionExpiredBtn.disabled = false;
@@ -1865,55 +2091,19 @@ function hideProfileSwitchPopup() {
     };
 
     /* --------------------------------------------------------------------------
-       GREETING TYPEWRITER: "Hi! <name>" types in letter by letter, holds,
-       then deletes itself letter by letter, looping. Uses the saved
-       display name for the given username (falls back to the most
-       recently saved account, then to "Student").
+       PROFILE NAME: prints the student's name under the "Student Profile"
+       heading. Uses the saved display name for the given username (falls
+       back to the most recently saved account, then to "Student").
        -------------------------------------------------------------------------- */
-    const greetingTyperTimers = {};
-
-    const startGreetingTyper = (elementId, username) => {
-      const el = document.getElementById(elementId);
+    const showProfileName = (username) => {
+      const el = document.getElementById('profileNameText');
       if (!el) return;
-
-      // Stop any previous loop already running on this element
-      // (e.g. switching accounts on the profile page) before starting a new one.
-      clearTimeout(greetingTyperTimers[elementId]);
 
       const accounts = getSavedAccounts();
       const account = (username && accounts.find((a) => a.username === username))
         || accounts[accounts.length - 1];
-      const name = (account && (account.displayName || account.username)) || 'Student';
-      const message = `Hi! ${name}`;
 
-      const TYPE_MS = 80;
-      const DELETE_MS = 45;
-      const HOLD_MS = 1400;
-      const PAUSE_MS = 500;
-
-      let i = 0;
-      let deleting = false;
-
-      const tick = () => {
-        el.textContent = message.slice(0, i);
-
-        if (!deleting && i === message.length) {
-          deleting = true;
-          greetingTyperTimers[elementId] = setTimeout(tick, HOLD_MS);
-          return;
-        }
-
-        if (deleting && i === 0) {
-          deleting = false;
-          greetingTyperTimers[elementId] = setTimeout(tick, PAUSE_MS);
-          return;
-        }
-
-        i += deleting ? -1 : 1;
-        greetingTyperTimers[elementId] = setTimeout(tick, deleting ? DELETE_MS : TYPE_MS);
-      };
-
-      tick();
+      el.textContent = (account && (account.displayName || account.username)) || 'Student';
     };
 
     const getInitials = (name) => {
@@ -2002,13 +2192,14 @@ function hideProfileSwitchPopup() {
       }
 
       upsertSavedAccount(username, password);
+      setAccountSession(username, sessionId);
 
       return data;
     };
 
     const loadProfile = async (username) => {
       hydrateLocalState(username);
-      startGreetingTyper('profileGreetingTyperText', username);
+      showProfileName(username);
 
       const cachedProfile = readCachedProfile(username);
       if (cachedProfile) {
@@ -2045,7 +2236,7 @@ function hideProfileSwitchPopup() {
             || parsedFields.find((f) => f.label.toLowerCase().includes('name') && !f.label.toLowerCase().includes('father') && !f.label.toLowerCase().includes('mother'));
           if (nameField && nameField.value) {
             upsertSavedAccount(username, null, nameField.value.replace(/<[^>]+>/g, '').trim());
-            startGreetingTyper('profileGreetingTyperText', username);
+            showProfileName(username);
           }
 
           let base64Photo = null;
@@ -2070,7 +2261,7 @@ function hideProfileSwitchPopup() {
         }
       } catch (err) {
         if (!cachedProfile) {
-          profileContent.innerHTML = '<p style="font-family:\'IBM Plex Mono\',monospace;font-size:13px;color:var(--stamp-red);text-align:center;padding:20px;">Could not load profile — check your connection or try logging in again.</p>';
+          profileContent.innerHTML = '<p style="font-family:\'IBM Plex Mono\',monospace;font-size:13px;color:var(--low-red);text-align:center;padding:20px;">Could not load profile — check your connection or try logging in again.</p>';
         }
       }
     };
@@ -2104,7 +2295,7 @@ function hideProfileSwitchPopup() {
       btn.disabled = true;
       btn.textContent = 'Verifying...';
       status.textContent = '';
-      status.style.color = 'var(--stamp-red)';
+      status.style.color = 'var(--low-red)';
       stamp.classList.remove('show');
       showSection(null);
 
@@ -2136,218 +2327,262 @@ function hideProfileSwitchPopup() {
     });
 
     /* --------------------------------------------------------------------------
-       14. FLOATING ACTION NAVIGATION MENU (Staggered Vertical Pill Stack)
-       Replaces the old radial arc. When the bottom-right FAB is clicked,
-       an elegant vertical stack of rounded action pills slides upwards.
-       All labels are shown completely without truncation.
-       "Mark Attendance" sits at the bottom (closest to the thumb) with
-       a prominent high-contrast emerald green style as the top priority.
+       14. BOTTOM NAVIGATION BAR
+       A fixed tab bar along the bottom edge; it scrolls sideways when the
+       tabs don't all fit. The tabs themselves are plain markup in
+       login.html, CSS shows the bar only while the app header is visible,
+       and showSection() marks the active tab — so all that is left here is
+       the click handler further down.
        -------------------------------------------------------------------------- */
-    const radialFabBtn = document.getElementById('radialFabBtn');
-    const radialMenu = document.getElementById('radialMenu');
-    const radialBackdrop = document.getElementById('radialMenuBackdrop');
-    const radialItemsEl = document.getElementById('radialMenuItems');
+    const bottomNav = document.getElementById('bottomNav');
 
-    const RADIAL_ITEMS = [
-      { action: 'profile', label: 'Profile', icon: '<circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 4-6 8-6s8 2 8 6"/>' },
-      { action: 'timetable', label: 'Timetable', icon: '<rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>' },
-      { action: 'courses', label: 'Courses', icon: '<path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/><line x1="8" y1="6" x2="16" y2="6"/><line x1="8" y1="10" x2="14" y2="10"/>' },
-      { action: 'attendance', label: 'Attendance', icon: '<polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>' },
-      { action: 'internalMarks', label: 'Internal Marks', icon: '<path d="M9 11H3v10h6z"/><path d="M15 5H9v16h6z"/><path d="M21 3h-6v18h6z"/>' },
-      { action: 'currentResults', label: 'Results', icon: '<path d="M12 15l-4-4h8z"/><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M8 8h8"/>' },
-      { action: 'markAttendance', label: 'Mark Attendance', icon: '<polyline points="20 6 9 17 4 12"/>' }
+    /* --------------------------------------------------------------------------
+       SUBJECT FEEDBACK
+       Loads the subjects awaiting feedback, lets the student pick a rating,
+       comment and subjects, then submits on their own session. "One-Tap
+       Submit All" does the lot at once: a random comment + "Strongly Agree"
+       + every pending subject.
+       -------------------------------------------------------------------------- */
+    const FEEDBACK_RATINGS = [
+      { value: '1', label: 'Strongly Disagree' },
+      { value: '2', label: 'Disagree' },
+      { value: '3', label: 'Neutral' },
+      { value: '4', label: 'Agree' },
+      { value: '5', label: 'Strongly Agree' }
     ];
 
-    let radialOpen = false;
-    let scrollAngle = 0;
-    let targetScrollAngle = 0;
-    let openProgress = 0;
+    const feedbackState = { subjects: [], selectedIds: [], rating: '5', comment: '', loaded: false, busy: false };
 
-    const renderRadialMenu = () => {
-      radialItemsEl.innerHTML = RADIAL_ITEMS.map((item, i) => `
-        <button class="radial-item menu-item" data-action="${item.action}" data-index="${i}" type="button">
-          <span class="radial-item-icon">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${item.icon}</svg>
-          </span>
-          <span class="radial-item-label">${esc(item.label)}</span>
-        </button>
+    const fetchRandomFeedbackComment = async () => {
+      try {
+        const res = await fetch(`${API_BASE}/api/feedback/comment`, { headers: { 'X-Client-Session': sessionId } });
+        if (res.ok) {
+          const data = await res.json();
+          if (data.comment) return data.comment;
+        }
+      } catch (err) { /* ignore — caller falls back */ }
+      return '';
+    };
+
+    const loadFeedbackSubjects = async () => {
+      const res = await fetch(`${API_BASE}/api/feedback/subjects`, { headers: { 'X-Client-Session': sessionId } });
+      if (!await checkResponseAuth(res)) throw new Error('Session expired');
+      if (!res.ok) throw new Error('Failed to load subjects');
+      const data = await res.json();
+      return Array.isArray(data.subjects) ? data.subjects : [];
+    };
+
+    const renderFeedback = () => {
+      if (feedbackState.subjects.length === 0) {
+        feedbackContent.innerHTML = `
+          <div class="fb-empty">
+            <p>No subjects are awaiting feedback — it may already be submitted.</p>
+            <button class="att-tool-btn" type="button" data-fb="reload">Reload</button>
+          </div>`;
+        return;
+      }
+
+      const ratingBtns = FEEDBACK_RATINGS.map((r) => `
+        <button class="fb-rating-btn${feedbackState.rating === r.value ? ' active' : ''}" type="button" data-fb="rating" data-value="${r.value}">${r.label}</button>
       `).join('');
+
+      const subjectRows = feedbackState.subjects.map((s) => {
+        const checked = feedbackState.selectedIds.includes(s.id);
+        return `
+          <label class="fb-subject${checked ? ' checked' : ''}">
+            <input type="checkbox" data-fb="subject" data-id="${esc(s.id)}" ${checked ? 'checked' : ''}>
+            <span class="fb-subject-body">
+              <span class="fb-subject-name">${esc(s.name)}</span>
+              ${s.faculty ? `<span class="fb-subject-faculty">${esc(s.faculty)}</span>` : ''}
+            </span>
+          </label>`;
+      }).join('');
+
+      const allSelected = feedbackState.selectedIds.length === feedbackState.subjects.length;
+
+      feedbackContent.innerHTML = `
+        <div class="fb-onetap">
+          <div class="fb-onetap-text">
+            <span class="fb-onetap-title">One-Tap Submit All</span>
+            <span class="fb-onetap-sub">Rates every subject "Strongly Agree" with a random comment and submits instantly.</span>
+          </div>
+          <button class="att-action-btn" type="button" data-fb="onetap">One-Tap Submit All</button>
+        </div>
+
+        <div class="fb-field">
+          <span class="fb-label">Rating — applies to every selected subject</span>
+          <div class="fb-rating-row">${ratingBtns}</div>
+        </div>
+
+        <div class="fb-field">
+          <div class="fb-label-row">
+            <span class="fb-label">Comment</span>
+            <button class="att-tool-btn icon-only" type="button" data-fb="random" title="Random comment" aria-label="Load a random comment">&#8635;</button>
+          </div>
+          <textarea class="fb-comment" data-fb="comment" rows="3" maxlength="500" placeholder="Write a comment, or use the shuffle button for a random one">${esc(feedbackState.comment)}</textarea>
+          <span class="fb-charcount"><span data-fb="count">${feedbackState.comment.length}</span>/500</span>
+        </div>
+
+        <div class="fb-field">
+          <div class="fb-label-row">
+            <span class="fb-label" data-fb="subjCount">Subjects (${feedbackState.selectedIds.length}/${feedbackState.subjects.length})</span>
+            <button class="att-tool-btn" type="button" data-fb="toggleAll">${allSelected ? 'Deselect all' : 'Select all'}</button>
+          </div>
+          <div class="fb-subject-list">${subjectRows}</div>
+        </div>
+
+        <button class="att-action-btn fb-submit" type="button" data-fb="submit">Submit Feedback (${feedbackState.selectedIds.length})</button>
+        <div class="fb-result" data-fb="result"></div>
+      `;
     };
 
-    // Initialize DOM nodes once at load
-    renderRadialMenu();
+    const refreshFeedbackData = async () => {
+      const [subjects, comment] = await Promise.all([loadFeedbackSubjects(), fetchRandomFeedbackComment()]);
+      feedbackState.subjects = subjects;
+      feedbackState.selectedIds = subjects.map((s) => s.id);
+      if (!feedbackState.comment) feedbackState.comment = comment;
+      feedbackState.loaded = true;
+      renderFeedback();
+    };
 
-    const animateRadialMenu = () => {
-      // Smoothly interpolate open/close scale progress and scroll angle
-      openProgress += ((radialOpen ? 1 : 0) - openProgress) * 0.16;
-      scrollAngle += (targetScrollAngle - scrollAngle) * 0.15;
+    const openFeedback = async () => {
+      showSection(feedbackSection);
+      if (feedbackState.loaded) { renderFeedback(); return; }
+      feedbackContent.innerHTML = '<p class="fb-loading">Loading feedback…</p>';
+      try {
+        await refreshFeedbackData();
+      } catch (err) {
+        feedbackContent.innerHTML = '<p class="fb-loading">Unable to load feedback. Check your connection and try again.</p>';
+      }
+    };
 
-      const items = radialItemsEl.querySelectorAll('.radial-item');
-      const R = 152; // Optimal radius from FAB center
+    const setFeedbackResult = (msg, ok) => {
+      const el = feedbackContent.querySelector('[data-fb="result"]');
+      if (el) {
+        el.textContent = msg;
+        el.className = `fb-result show ${ok ? 'ok' : 'err'}`;
+      }
+    };
 
-      items.forEach((btn) => {
-        const i = parseInt(btn.dataset.index, 10);
-        // Base angles: Item 3 (Mark Attendance) is at 45 degrees (exact center of viewport quadrant)
-        const baseAngle = 45 + (i - 3) * 28;
-        const currentAngle = baseAngle + scrollAngle;
-        const angleRad = currentAngle * Math.PI / 180;
-
-        // Position on arc scaled by current opening progress
-        const x = Math.cos(angleRad) * R * openProgress;
-        const y = Math.sin(angleRad) * R * openProgress;
-
-        // Visual highlight based on proximity to center focus angle (45 degrees)
-        const distFromCenter = Math.abs(currentAngle - 45);
-
-        let itemScale = 1.0;
-        if (distFromCenter < 90) {
-          itemScale = 1.0 + 0.14 * Math.cos(distFromCenter * Math.PI / 180);
-        }
-        itemScale *= openProgress;
-
-        let itemOpacity = 1.0;
-        if (distFromCenter > 30) {
-          itemOpacity = Math.max(0.12, 1.0 - 0.7 * ((distFromCenter - 30) / 60));
-        }
-        itemOpacity *= (openProgress > 0.15 ? 1 : openProgress / 0.15);
-
-        // Hardware-accelerated smooth coordinates and scaling
-        btn.style.transform = `translate(50%, 50%) translate(${-x.toFixed(1)}px, ${-y.toFixed(1)}px) scale(${itemScale.toFixed(3)})`;
-        btn.style.opacity = itemOpacity.toFixed(3);
-
-        // Ensure focused items sit naturally on top of others
-        btn.style.zIndex = Math.round(100 - distFromCenter);
-
-        // Toggle button clicks based on visual state and open progress
-        if (openProgress > 0.5 && itemOpacity > 0.25) {
-          btn.style.pointerEvents = 'auto';
-        } else {
-          btn.style.pointerEvents = 'none';
-        }
+    const submitFeedbackRequest = async (ratingValue, comment, ids) => {
+      const res = await fetch(`${API_BASE}/api/feedback/submit`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'X-Client-Session': sessionId },
+        body: JSON.stringify({ comment, optionNo: ratingValue, selectedSubjectIds: ids })
       });
-
-      requestAnimationFrame(animateRadialMenu);
+      if (!await checkResponseAuth(res)) throw new Error('Session expired');
+      let data = {};
+      try { data = await res.json(); } catch (err) { /* ignore */ }
+      if (!res.ok) throw new Error(data.message || 'Feedback submission failed');
+      return data;
     };
 
-    // Fire up the animation engine loop
-    requestAnimationFrame(animateRadialMenu);
+    feedbackContent.addEventListener('input', (e) => {
+      const el = e.target.closest('[data-fb="comment"]');
+      if (!el) return;
+      feedbackState.comment = el.value;
+      const count = feedbackContent.querySelector('[data-fb="count"]');
+      if (count) count.textContent = String(el.value.length);
+    });
 
-    const openRadialMenu = () => {
-      // Guarantee Mark Attendance starts centered and highlighted
-      targetScrollAngle = 0;
-      scrollAngle = 0;
-      radialOpen = true;
-      radialMenu.classList.add('open');
-      radialBackdrop.classList.add('open');
-      radialFabBtn.classList.add('open');
-      radialFabBtn.setAttribute('aria-expanded', 'true');
-    };
-
-    const closeRadialMenu = () => {
-      radialOpen = false;
-      radialMenu.classList.remove('open');
-      radialBackdrop.classList.remove('open');
-      radialFabBtn.classList.remove('open');
-      radialFabBtn.setAttribute('aria-expanded', 'false');
-    };
-
-    radialFabBtn.addEventListener('click', (e) => {
-      e.stopPropagation();
-      if (radialOpen) {
-        closeRadialMenu();
+    feedbackContent.addEventListener('change', (e) => {
+      const el = e.target.closest('[data-fb="subject"]');
+      if (!el) return;
+      const id = el.dataset.id;
+      if (el.checked) {
+        if (!feedbackState.selectedIds.includes(id)) feedbackState.selectedIds.push(id);
       } else {
-        accountMenu.classList.remove('open');
-        openRadialMenu();
+        feedbackState.selectedIds = feedbackState.selectedIds.filter((x) => x !== id);
+      }
+      const row = el.closest('.fb-subject');
+      if (row) row.classList.toggle('checked', el.checked);
+      const count = feedbackContent.querySelector('[data-fb="subjCount"]');
+      if (count) count.textContent = `Subjects (${feedbackState.selectedIds.length}/${feedbackState.subjects.length})`;
+      const submitBtn = feedbackContent.querySelector('[data-fb="submit"]');
+      if (submitBtn) submitBtn.textContent = `Submit Feedback (${feedbackState.selectedIds.length})`;
+    });
+
+    feedbackContent.addEventListener('click', async (e) => {
+      const el = e.target.closest('[data-fb]');
+      if (!el) return;
+      const kind = el.dataset.fb;
+
+      if (kind === 'reload') {
+        feedbackState.loaded = false;
+        feedbackState.comment = '';
+        openFeedback();
+        return;
+      }
+
+      if (kind === 'rating') {
+        feedbackState.rating = el.dataset.value;
+        feedbackContent.querySelectorAll('[data-fb="rating"]').forEach((b) =>
+          b.classList.toggle('active', b.dataset.value === feedbackState.rating));
+        return;
+      }
+
+      if (kind === 'toggleAll') {
+        const all = feedbackState.selectedIds.length === feedbackState.subjects.length;
+        feedbackState.selectedIds = all ? [] : feedbackState.subjects.map((s) => s.id);
+        renderFeedback();
+        return;
+      }
+
+      if (kind === 'random') {
+        const comment = await fetchRandomFeedbackComment();
+        if (comment) {
+          feedbackState.comment = comment;
+          const ta = feedbackContent.querySelector('[data-fb="comment"]');
+          const count = feedbackContent.querySelector('[data-fb="count"]');
+          if (ta) ta.value = comment;
+          if (count) count.textContent = String(comment.length);
+        }
+        return;
+      }
+
+      if (kind === 'onetap' || kind === 'submit') {
+        if (feedbackState.busy) return;
+
+        let comment = feedbackState.comment;
+        let ratingValue = feedbackState.rating;
+        let ids = feedbackState.selectedIds;
+
+        if (kind === 'onetap') {
+          ratingValue = '5';
+          ids = feedbackState.subjects.map((s) => s.id);
+          const fresh = await fetchRandomFeedbackComment();
+          if (fresh) comment = fresh;
+        }
+
+        if (!comment || comment.trim().length <= 10) {
+          setFeedbackResult('Add a comment longer than 10 characters (or use the shuffle button).', false);
+          return;
+        }
+        if (ids.length === 0) {
+          setFeedbackResult('Select at least one subject.', false);
+          return;
+        }
+
+        feedbackState.busy = true;
+        el.disabled = true;
+        const original = el.textContent;
+        el.textContent = 'Submitting…';
+        try {
+          const data = await submitFeedbackRequest(ratingValue, comment, ids);
+          const ok = data.success !== false;
+          // Reload the remaining subjects, then show the result on the fresh view.
+          feedbackState.comment = '';
+          await refreshFeedbackData();
+          setFeedbackResult(data.message || (ok ? 'Feedback submitted' : 'Feedback submission failed'), ok);
+        } catch (err) {
+          setFeedbackResult(err.message || 'Feedback submission failed', false);
+          el.disabled = false;
+          el.textContent = original;
+        } finally {
+          feedbackState.busy = false;
+        }
       }
     });
-
-    radialBackdrop.addEventListener('click', () => closeRadialMenu());
-
-    document.addEventListener('click', (e) => {
-      if (radialOpen && !radialMenu.contains(e.target) && e.target !== radialFabBtn && !radialFabBtn.contains(e.target)) {
-        closeRadialMenu();
-      }
-    });
-
-    // Inertial scrolling captured via mouse wheel, swipe gestures, and clicking & dragging
-    let isDragging = false;
-    let startY = 0;
-    let startAngle = 0;
-
-    const handleDragStart = (clientY) => {
-      if (!radialOpen) return;
-      isDragging = true;
-      startY = clientY;
-      startAngle = targetScrollAngle;
-    };
-
-    const handleDragMove = (clientY) => {
-      if (!isDragging || !radialOpen) return;
-      const deltaY = clientY - startY;
-      // Convert vertical drag delta to angular rotation (0.42 degrees per pixel)
-      targetScrollAngle = startAngle - deltaY * 0.42;
-      targetScrollAngle = Math.max(-85, Math.min(85, targetScrollAngle));
-    };
-
-    const handleDragEnd = () => {
-      isDragging = false;
-    };
-
-    radialMenu.addEventListener('wheel', (e) => {
-      if (!radialOpen) return;
-      e.preventDefault();
-      // Map mouse-wheel scrolls smoothly into dial rotation
-      targetScrollAngle -= e.deltaY * 0.12;
-      targetScrollAngle = Math.max(-85, Math.min(85, targetScrollAngle));
-    }, { passive: false });
-
-    radialMenu.addEventListener('touchstart', (e) => {
-      handleDragStart(e.touches[0].clientY);
-    }, { passive: false });
-
-    radialMenu.addEventListener('touchmove', (e) => {
-      if (isDragging && radialOpen) {
-        e.preventDefault();
-      }
-      handleDragMove(e.touches[0].clientY);
-    }, { passive: false });
-
-    radialMenu.addEventListener('touchend', () => {
-      handleDragEnd();
-    });
-
-    radialBackdrop.addEventListener('touchmove', (e) => {
-      if (radialOpen) e.preventDefault();
-    }, { passive: false });
-
-    radialBackdrop.addEventListener('wheel', (e) => {
-      if (radialOpen) e.preventDefault();
-    }, { passive: false });
-
-    radialMenu.addEventListener('mousedown', (e) => {
-      handleDragStart(e.clientY);
-    });
-
-    document.addEventListener('mousemove', (e) => {
-      handleDragMove(e.clientY);
-    });
-
-    document.addEventListener('mouseup', () => {
-      handleDragEnd();
-    });
-
-    // Show/hide the FAB in lockstep with the app header instead of touching
-    // every login/logout/switch-profile call site individually — one
-    // observer, one source of truth.
-    const syncRadialFabVisibility = () => {
-      const isActive = appHeader && appHeader.classList.contains('visible');
-      radialFabBtn.style.display = isActive ? 'flex' : 'none';
-      if (!isActive) closeRadialMenu();
-    };
-    if (appHeader) {
-      new MutationObserver(syncRadialFabVisibility).observe(appHeader, { attributes: true, attributeFilter: ['class'] });
-    }
-    syncRadialFabVisibility();
 
     const brandHomeBtn = document.getElementById('brandHomeBtn');
     if (brandHomeBtn) {
@@ -2363,7 +2598,6 @@ function hideProfileSwitchPopup() {
         renderSavedAccountsList();
         const isOpen = accountMenu.classList.toggle('open');
         headerProfileContainer.setAttribute('aria-expanded', isOpen);
-        closeRadialMenu();
       });
     }
 
@@ -2396,6 +2630,7 @@ function hideProfileSwitchPopup() {
       localStorage.removeItem('username');
       localStorage.removeItem('password');
       if (u) {
+        clearAccountSession(u);
         localStorage.removeItem(`profile:${u}`);
         localStorage.removeItem(`timetable:${u}`);
         localStorage.removeItem(`attendance:${u}`);
@@ -2468,6 +2703,15 @@ function hideProfileSwitchPopup() {
             accountMenu.classList.remove('open');
             await performFullLogout();
           } else {
+            // End the removed profile's kept-alive backend session too.
+            const removedSessionId = getAccountSession(usernameToRemove);
+            if (removedSessionId) {
+              fetch(`${API_BASE}/api/logout`, {
+                method: 'POST',
+                headers: { 'X-Client-Session': removedSessionId }
+              }).catch(() => {});
+            }
+            clearAccountSession(usernameToRemove);
             renderSavedAccountsList();
           }
           return;
@@ -2496,6 +2740,23 @@ function hideProfileSwitchPopup() {
         }
 
         accountMenu.classList.remove('open');
+
+        // This profile already has a session from its last login — pick it
+        // back up instead of logging in to SRM again. If that session has
+        // since expired, the first request after the reload gets a 401 and
+        // the "SRM Session Expired" popup offers the reconnect.
+        const keptSessionId = getAccountSession(account.username);
+        if (keptSessionId) {
+          sessionStorage.setItem('sessionId', keptSessionId);
+          sessionStorage.setItem('username', account.username);
+          localStorage.setItem('sessionId', keptSessionId);
+          localStorage.setItem('username', account.username);
+          // Reconnect reads the active password from here.
+          setStoredPassword(accountPassword);
+          window.location.reload();
+          return;
+        }
+
         try {
           sessionId = null;
           showProfileSwitchPopup(account.username);
@@ -2533,13 +2794,13 @@ function hideProfileSwitchPopup() {
       });
     }
 
-    radialItemsEl.addEventListener('click', async (e) => {
-      const item = e.target.closest('.menu-item');
+    bottomNav.addEventListener('click', async (e) => {
+      const item = e.target.closest('.bottom-nav-item');
       if (!item) return;
       const action = item.dataset.action;
       if (!action) return;
 
-      closeRadialMenu();
+      accountMenu.classList.remove('open');
       window.scrollTo(0, 0);
 
       if (action === 'profile') {
@@ -2556,5 +2817,7 @@ function hideProfileSwitchPopup() {
         loadCurrentResults();
       } else if (action === 'markAttendance') {
         openMarkAttendance();
+      } else if (action === 'feedback') {
+        openFeedback();
       }
     });
