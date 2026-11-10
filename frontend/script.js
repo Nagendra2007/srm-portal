@@ -1822,8 +1822,8 @@ function hideProfileSwitchPopup() {
       showSection(markAttendanceSection);
       clearMarkStatus();
       loadTodayAttendanceStatus();
-      const firstBox = document.getElementById('code0');
-      if (firstBox) setTimeout(() => firstBox.focus(), 50);
+      // No auto-focus on the code boxes: it pops the on-screen keyboard open
+      // as soon as the tab is tapped. The keyboard appears when a box is tapped.
     };
 
     /* --------------------------------------------------------------------------
