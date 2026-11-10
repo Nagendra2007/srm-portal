@@ -112,7 +112,7 @@
     flex-direction: column;
     align-items: center;
     background-color: var(--bg-app);
-    font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    font-family: 'Space Grotesk', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     color: var(--ink);
     overflow-x: hidden;
     touch-action: manipulation;
@@ -215,7 +215,7 @@
   }
 
   .brand-text {
-    font-family: 'IBM Plex Mono', monospace;
+    font-family: 'Space Grotesk', sans-serif;
     font-size: 13px;
     font-weight: 700;
     letter-spacing: 0.12em;
@@ -224,7 +224,7 @@
   }
 
   .brand-subtext {
-    font-family: 'IBM Plex Mono', monospace;
+    font-family: 'Space Grotesk', sans-serif;
     font-size: 9.5px;
     letter-spacing: 0.08em;
     color: var(--ink-muted);
@@ -371,7 +371,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    font-family: 'IBM Plex Mono', monospace;
+    font-family: 'Space Grotesk', sans-serif;
     font-size: 12px;
     font-weight: 700;
   }
@@ -384,7 +384,7 @@
   }
 
   .saved-account-name {
-    font-family: 'IBM Plex Mono', monospace;
+    font-family: 'Space Grotesk', sans-serif;
     font-size: 12px;
     font-weight: 600;
     color: var(--ink);
@@ -394,13 +394,13 @@
   }
 
   .saved-account-reg {
-    font-family: 'IBM Plex Mono', monospace;
+    font-family: 'Space Grotesk', sans-serif;
     font-size: 10px;
     color: var(--ink-muted);
   }
 
   .saved-account-active-badge {
-    font-family: 'IBM Plex Mono', monospace;
+    font-family: 'Space Grotesk', sans-serif;
     font-size: 9px;
     letter-spacing: 0.05em;
     color: var(--good-green, #3B6B4A);
@@ -429,7 +429,7 @@
 
   .no-saved-accounts {
     padding: 14px;
-    font-family: 'IBM Plex Mono', monospace;
+    font-family: 'Space Grotesk', sans-serif;
     font-size: 11px;
     color: var(--ink-muted);
     text-align: center;
@@ -463,7 +463,7 @@
   }
 
   .menu-item {
-    font-family: 'IBM Plex Mono', monospace;
+    font-family: 'Space Grotesk', sans-serif;
     font-size: 12px;
     font-weight: 500;
     letter-spacing: 0.05em;
@@ -549,7 +549,7 @@
     border-radius: 12px;
     background: transparent;
     color: var(--ink-muted);
-    font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    font-family: 'Space Grotesk', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     font-size: 11px;
     font-weight: 600;
     white-space: nowrap;
@@ -617,7 +617,7 @@
     border: 1px solid var(--header-border);
     background: var(--paper);
     color: var(--ink-secondary);
-    font-family: 'IBM Plex Mono', monospace;
+    font-family: 'Space Grotesk', sans-serif;
     font-size: 11px;
     font-weight: 600;
     letter-spacing: 0.05em;
@@ -684,7 +684,7 @@
   }
 
   .eyebrow {
-    font-family: 'IBM Plex Mono', monospace;
+    font-family: 'Space Grotesk', sans-serif;
     font-size: 11px;
     font-weight: 600;
     letter-spacing: 0.14em;
@@ -706,7 +706,7 @@
   }
 
   h1 {
-    font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    font-family: 'Space Grotesk', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     font-weight: 700;
     font-size: clamp(23px, 4.5vw, 28px);
     color: var(--ink);
@@ -724,7 +724,7 @@
   }
 
   .profile-name {
-    font-family: 'IBM Plex Mono', monospace;
+    font-family: 'Space Grotesk', sans-serif;
     font-size: 13px;
     font-weight: 600;
     color: var(--ink-muted);
@@ -740,7 +740,7 @@
 
   .row label {
     display: block;
-    font-family: 'IBM Plex Mono', monospace;
+    font-family: 'Space Grotesk', sans-serif;
     font-size: 11px;
     font-weight: 600;
     letter-spacing: 0.08em;
@@ -762,7 +762,7 @@
     border: none;
     background: transparent;
     border-bottom: 1.5px solid var(--input-line);
-    font-family: 'IBM Plex Mono', monospace;
+    font-family: 'Space Grotesk', sans-serif;
     font-size: 15px;
     font-weight: 500;
     letter-spacing: 0.02em;
@@ -880,7 +880,7 @@
   }
 
   button#loginBtn {
-    font-family: 'IBM Plex Mono', monospace;
+    font-family: 'Space Grotesk', sans-serif;
     font-weight: 600;
     font-size: 13px;
     letter-spacing: 0.08em;
@@ -910,7 +910,7 @@
   }
 
   .status {
-    font-family: 'IBM Plex Mono', monospace;
+    font-family: 'Space Grotesk', sans-serif;
     font-size: 12px;
     font-weight: 500;
     color: var(--low-red);
@@ -970,7 +970,7 @@
   }
 
   .panel-header h2 {
-    font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    font-family: 'Space Grotesk', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     font-size: 21px;
     font-weight: 700;
     margin: 0;
@@ -983,7 +983,7 @@
   }
 
   .panel-badge {
-    font-family: 'IBM Plex Mono', monospace;
+    font-family: 'Space Grotesk', sans-serif;
     font-size: 11px;
     font-weight: 600;
     letter-spacing: 0.05em;
@@ -1074,7 +1074,7 @@
 
   .profile-field-label {
     display: block;
-    font-family: 'IBM Plex Mono', monospace;
+    font-family: 'Space Grotesk', sans-serif;
     font-size: 10px;
     font-weight: 600;
     letter-spacing: 0.05em;
@@ -1084,7 +1084,7 @@
   }
 
   .profile-field-value {
-    font-family: 'IBM Plex Mono', monospace;
+    font-family: 'Space Grotesk', sans-serif;
     font-weight: 600;
     color: var(--ink);
     font-size: 12.5px;
@@ -1094,7 +1094,7 @@
     margin: 18px 0 0;
     padding-top: 12px;
     border-top: 1px dashed var(--paper-line);
-    font-family: 'IBM Plex Mono', monospace;
+    font-family: 'Space Grotesk', sans-serif;
     font-size: 11px;
     letter-spacing: 0.06em;
     text-transform: uppercase;
@@ -1134,7 +1134,7 @@
   }
 
   .subject-name {
-    font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    font-family: 'Space Grotesk', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     font-weight: 700;
     font-size: 15px;
     color: var(--ink);
@@ -1142,7 +1142,7 @@
   }
 
   .subject-percent {
-    font-family: 'IBM Plex Mono', monospace;
+    font-family: 'Space Grotesk', sans-serif;
     font-weight: 700;
     font-size: 15px;
     padding: 2px 8px;
@@ -1189,7 +1189,7 @@
   .subject-minmax {
     display: flex;
     justify-content: space-between;
-    font-family: 'IBM Plex Mono', monospace;
+    font-family: 'Space Grotesk', sans-serif;
     font-size: 10px;
     font-weight: 500;
     color: var(--ink-muted);
@@ -1222,7 +1222,7 @@
   }
 
   .subject-code {
-    font-family: 'IBM Plex Mono', monospace;
+    font-family: 'Space Grotesk', sans-serif;
     font-size: 11px;
     color: var(--ink-muted);
     letter-spacing: 0.04em;
@@ -1241,7 +1241,7 @@
     border-radius: 6px;
     background: var(--button-bg);
     color: var(--button-text);
-    font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    font-family: 'Space Grotesk', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     font-size: 13px;
     font-weight: 700;
     cursor: pointer;
@@ -1275,7 +1275,7 @@
     border-radius: 8px;
     background: var(--paper-card);
     color: var(--ink);
-    font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    font-family: 'Space Grotesk', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     font-size: 13px;
     font-weight: 600;
     cursor: pointer;
@@ -1299,7 +1299,7 @@
   .att-sort-note {
     margin: -6px 0 12px;
     text-align: right;
-    font-family: 'IBM Plex Mono', monospace;
+    font-family: 'Space Grotesk', sans-serif;
     font-size: 10px;
     color: var(--ink-muted);
   }
@@ -1309,7 +1309,7 @@
   }
 
   .att-panel-title {
-    font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    font-family: 'Space Grotesk', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     font-size: 15px;
     font-weight: 700;
     color: var(--ink);
@@ -1354,7 +1354,7 @@
   }
 
   .att-whatif-from {
-    font-family: 'IBM Plex Mono', monospace;
+    font-family: 'Space Grotesk', sans-serif;
     color: var(--ink-muted);
     white-space: nowrap;
   }
@@ -1374,7 +1374,7 @@
   }
 
   .att-stepper-label {
-    font-family: 'IBM Plex Mono', monospace;
+    font-family: 'Space Grotesk', sans-serif;
     font-size: 9px;
     font-weight: 600;
     text-transform: uppercase;
@@ -1390,7 +1390,7 @@
   }
 
   .att-stepper-value {
-    font-family: 'IBM Plex Mono', monospace;
+    font-family: 'Space Grotesk', sans-serif;
     font-size: 16px;
     font-weight: 700;
     color: var(--ink);
@@ -1444,7 +1444,7 @@
      ========================================================================== */
   .fb-loading,
   .fb-empty {
-    font-family: 'IBM Plex Mono', monospace;
+    font-family: 'Space Grotesk', sans-serif;
     font-size: 13px;
     color: var(--ink-muted);
     text-align: center;
@@ -1480,7 +1480,7 @@
   }
 
   .fb-onetap-title {
-    font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    font-family: 'Space Grotesk', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     font-weight: 700;
     font-size: 15px;
     color: var(--ink);
@@ -1503,7 +1503,7 @@
 
   .fb-label {
     display: block;
-    font-family: 'IBM Plex Mono', monospace;
+    font-family: 'Space Grotesk', sans-serif;
     font-size: 11px;
     font-weight: 600;
     text-transform: uppercase;
@@ -1536,7 +1536,7 @@
     border-radius: 999px;
     background: var(--paper-card);
     color: var(--ink);
-    font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    font-family: 'Space Grotesk', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     font-size: 12px;
     font-weight: 600;
     cursor: pointer;
@@ -1562,7 +1562,7 @@
     border-radius: 8px;
     background: var(--paper-card);
     color: var(--ink);
-    font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    font-family: 'Space Grotesk', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     font-size: 14px;
     line-height: 1.5;
   }
@@ -1576,7 +1576,7 @@
     display: block;
     margin-top: 4px;
     text-align: right;
-    font-family: 'IBM Plex Mono', monospace;
+    font-family: 'Space Grotesk', sans-serif;
     font-size: 10px;
     color: var(--ink-muted);
   }
@@ -1641,7 +1641,7 @@
     margin-top: 12px;
     padding: 10px 12px;
     border-radius: 8px;
-    font-family: 'IBM Plex Mono', monospace;
+    font-family: 'Space Grotesk', sans-serif;
     font-size: 12px;
     line-height: 1.4;
   }
@@ -1663,7 +1663,7 @@
   }
 
   .stat-label {
-    font-family: 'IBM Plex Mono', monospace;
+    font-family: 'Space Grotesk', sans-serif;
     font-size: 9px;
     font-weight: 600;
     text-transform: uppercase;
@@ -1673,7 +1673,7 @@
   }
 
   .stat-value {
-    font-family: 'IBM Plex Mono', monospace;
+    font-family: 'Space Grotesk', sans-serif;
     font-size: 13px;
     font-weight: 700;
     color: var(--ink);
@@ -1709,7 +1709,7 @@
   }
 
   .marks-breakdown-cell {
-    font-family: 'IBM Plex Mono', monospace;
+    font-family: 'Space Grotesk', sans-serif;
     padding: 8px 10px;
   }
 
@@ -1741,7 +1741,7 @@
   .code-label {
     display: block;
     text-align: center;
-    font-family: 'IBM Plex Mono', monospace;
+    font-family: 'Space Grotesk', sans-serif;
     font-size: 11px;
     font-weight: 600;
     letter-spacing: 0.12em;
@@ -1780,7 +1780,7 @@
     width: clamp(32px, 10vw, 44px);
     height: clamp(42px, 13vw, 54px);
     text-align: center;
-    font-family: 'IBM Plex Mono', monospace;
+    font-family: 'Space Grotesk', sans-serif;
     font-size: clamp(17px, 5vw, 22px);
     font-weight: 700;
     color: var(--ink);
@@ -1814,7 +1814,7 @@
     align-items: center;
     gap: 8px;
     text-align: center;
-    font-family: 'IBM Plex Mono', monospace;
+    font-family: 'Space Grotesk', sans-serif;
     font-size: 13px;
     line-height: 1.4;
     margin-bottom: 20px;
@@ -1864,7 +1864,7 @@
   }
 
   .today-card-title {
-    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-family: 'Space Grotesk', sans-serif;
     font-weight: 700;
     font-size: 14.5px;
     letter-spacing: -0.01em;
@@ -1872,7 +1872,7 @@
   }
 
   .today-card-dayorder {
-    font-family: 'IBM Plex Mono', monospace;
+    font-family: 'Space Grotesk', sans-serif;
     font-size: 12px;
     font-weight: 700;
     color: var(--ink-muted);
@@ -1892,7 +1892,7 @@
   }
 
   .today-card-section-label {
-    font-family: 'IBM Plex Mono', monospace;
+    font-family: 'Space Grotesk', sans-serif;
     font-size: 11px;
     font-weight: 700;
     letter-spacing: 0.04em;
@@ -1905,7 +1905,7 @@
     display: flex;
     align-items: center;
     gap: 8px;
-    font-family: 'IBM Plex Mono', monospace;
+    font-family: 'Space Grotesk', sans-serif;
     font-size: 12.5px;
     color: var(--good-green);
     background: var(--good-green-bg);
@@ -1942,7 +1942,7 @@
   }
 
   .today-period-hour {
-    font-family: 'IBM Plex Mono', monospace;
+    font-family: 'Space Grotesk', sans-serif;
     font-size: 11px;
     font-weight: 700;
     letter-spacing: 0.03em;
@@ -1951,7 +1951,7 @@
   }
 
   .today-period-subject {
-    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-family: 'Space Grotesk', sans-serif;
     font-weight: 600;
     font-size: 13.5px;
     line-height: 1.4;
@@ -1982,7 +1982,7 @@
   }
 
   .today-card-empty {
-    font-family: 'IBM Plex Mono', monospace;
+    font-family: 'Space Grotesk', sans-serif;
     font-size: 13px;
     color: var(--ink-muted);
     text-align: center;
@@ -2008,7 +2008,7 @@
     width: 100%;
     border-radius: 999px;
     padding: 14px;
-    font-family: 'IBM Plex Mono', monospace;
+    font-family: 'Space Grotesk', sans-serif;
     font-weight: 600;
     font-size: 13px;
     letter-spacing: 0.08em;
@@ -2045,7 +2045,7 @@
   }
 
   .day-pill-btn {
-    font-family: 'IBM Plex Mono', monospace;
+    font-family: 'Space Grotesk', sans-serif;
     font-size: 11.5px;
     font-weight: 600;
     padding: 6px 14px;
@@ -2099,7 +2099,7 @@
   }
 
   .timetable-day-title {
-    font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    font-family: 'Space Grotesk', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     font-size: 16px;
     font-weight: 700;
     color: var(--ink);
@@ -2109,7 +2109,7 @@
   }
 
   .timetable-day-badge {
-    font-family: 'IBM Plex Mono', monospace;
+    font-family: 'Space Grotesk', sans-serif;
     font-size: 10px;
     font-weight: 600;
     color: var(--accent);
@@ -2154,7 +2154,7 @@
   }
 
   .slot-period-num {
-    font-family: 'IBM Plex Mono', monospace;
+    font-family: 'Space Grotesk', sans-serif;
     font-size: 9.5px;
     font-weight: 700;
     text-transform: uppercase;
@@ -2163,7 +2163,7 @@
   }
 
   .slot-time-range {
-    font-family: 'IBM Plex Mono', monospace;
+    font-family: 'Space Grotesk', sans-serif;
     font-size: 11px;
     font-weight: 600;
     color: var(--ink);
@@ -2189,7 +2189,7 @@
   }
 
   .slot-course-code {
-    font-family: 'IBM Plex Mono', monospace;
+    font-family: 'Space Grotesk', sans-serif;
     font-size: 11.5px;
     font-weight: 700;
     color: var(--accent);
@@ -2200,7 +2200,7 @@
   }
 
   .slot-room-tag {
-    font-family: 'IBM Plex Mono', monospace;
+    font-family: 'Space Grotesk', sans-serif;
     font-size: 11px;
     font-weight: 600;
     color: var(--ink);
@@ -2215,7 +2215,7 @@
   }
 
   .slot-course-title {
-    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-family: 'Space Grotesk', sans-serif;
     font-size: 13.5px;
     font-weight: 600;
     color: var(--ink);
@@ -2228,7 +2228,7 @@
   }
 
   .slot-free-text {
-    font-family: 'IBM Plex Mono', monospace;
+    font-family: 'Space Grotesk', sans-serif;
     font-size: 11.5px;
     font-style: italic;
     color: var(--ink-muted);
@@ -2249,7 +2249,7 @@
     border: 1px solid var(--paper-line);
     background: var(--paper-card);
     color: var(--ink);
-    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-family: 'Space Grotesk', sans-serif;
     font-size: 13px;
     transition: border-color 0.15s ease;
   }
@@ -2298,7 +2298,7 @@
   }
 
   .course-code-badge {
-    font-family: 'IBM Plex Mono', monospace;
+    font-family: 'Space Grotesk', sans-serif;
     font-size: 12px;
     font-weight: 700;
     color: var(--accent);
@@ -2309,7 +2309,7 @@
   }
 
   .course-ltpc-badge {
-    font-family: 'IBM Plex Mono', monospace;
+    font-family: 'Space Grotesk', sans-serif;
     font-size: 10.5px;
     font-weight: 600;
     color: var(--ink-muted);
@@ -2320,7 +2320,7 @@
   }
 
   .course-card-title {
-    font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    font-family: 'Space Grotesk', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     font-size: 15.5px;
     font-weight: 700;
     color: var(--ink);
@@ -2354,7 +2354,7 @@
   }
 
   .course-meta-label {
-    font-family: 'IBM Plex Mono', monospace;
+    font-family: 'Space Grotesk', sans-serif;
     font-size: 10px;
     font-weight: 600;
     text-transform: uppercase;
@@ -2366,12 +2366,12 @@
 
   .course-meta-val {
     flex: 1;
-    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-family: 'Space Grotesk', sans-serif;
     font-weight: 500;
   }
 
   .course-rooms-val {
-    font-family: 'IBM Plex Mono', monospace;
+    font-family: 'Space Grotesk', sans-serif;
     font-weight: 600;
     color: var(--ink);
   }
@@ -2430,7 +2430,7 @@
   }
 
   .live-widget-title {
-    font-family: 'IBM Plex Mono', monospace;
+    font-family: 'Space Grotesk', sans-serif;
     font-size: 11px;
     font-weight: 700;
     text-transform: uppercase;
@@ -2439,7 +2439,7 @@
   }
 
   .live-day-tag {
-    font-family: 'IBM Plex Mono', monospace;
+    font-family: 'Space Grotesk', sans-serif;
     font-size: 10px;
     font-weight: 600;
     padding: 3px 8px;
@@ -2488,7 +2488,7 @@
   }
 
   .live-badge {
-    font-family: 'IBM Plex Mono', monospace;
+    font-family: 'Space Grotesk', sans-serif;
     font-size: 9.5px;
     font-weight: 700;
     text-transform: uppercase;
@@ -2513,7 +2513,7 @@
   }
 
   .live-slot-period {
-    font-family: 'IBM Plex Mono', monospace;
+    font-family: 'Space Grotesk', sans-serif;
     font-size: 10px;
     font-weight: 600;
     color: var(--ink-muted);
@@ -2533,7 +2533,7 @@
   }
 
   .live-course-code {
-    font-family: 'IBM Plex Mono', monospace;
+    font-family: 'Space Grotesk', sans-serif;
     font-size: 13px;
     font-weight: 700;
     color: var(--ink);
@@ -2545,7 +2545,7 @@
   }
 
   .live-room-pill {
-    font-family: 'IBM Plex Mono', monospace;
+    font-family: 'Space Grotesk', sans-serif;
     font-size: 10px;
     font-weight: 600;
     background: var(--paper-dark);
@@ -2578,7 +2578,7 @@
     display: flex;
     align-items: center;
     gap: 5px;
-    font-family: 'IBM Plex Mono', monospace;
+    font-family: 'Space Grotesk', sans-serif;
     font-size: 10px;
     color: var(--ink-muted);
     margin-top: 2px;
@@ -2687,7 +2687,7 @@
   display:flex;
   align-items:center;
   justify-content:center;
-  font-family:'IBM Plex Mono',monospace;
+  font-family:'Space Grotesk',sans-serif;
   font-weight:700;
   font-size:18px;
   letter-spacing:0.02em;
@@ -2704,14 +2704,14 @@
 }
 #profileSwitchTitle{
   margin:0 0 6px;
-  font-family:'Plus Jakarta Sans',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
+  font-family:'Space Grotesk',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
   font-size:18px;
   font-weight:700;
   color:var(--ink);
 }
 #profileSwitchMessage{
   margin:0;
-  font-family:'IBM Plex Mono',monospace;
+  font-family:'Space Grotesk',sans-serif;
   font-size:12.5px;
   color:var(--ink-muted);
   line-height:1.5;
@@ -2767,14 +2767,14 @@ body.profile-switching > *:not(#profileSwitchOverlay){pointer-events:none}
 }
 #sessionExpiredTitle{
   margin:0 0 10px;
-  font-family:'Plus Jakarta Sans', sans-serif;
+  font-family:'Space Grotesk', sans-serif;
   font-size:18px;
   font-weight:700;
   color:var(--ink);
 }
 #sessionExpiredMessage{
   margin:0 0 24px;
-  font-family:'IBM Plex Mono', monospace;
+  font-family:'Space Grotesk', sans-serif;
   font-size:12.5px;
   color:var(--ink-muted);
   line-height:1.5;
@@ -2785,7 +2785,7 @@ body.profile-switching > *:not(#profileSwitchOverlay){pointer-events:none}
   gap:10px;
 }
 #sessionExpiredBtn {
-  font-family: 'IBM Plex Mono', monospace;
+  font-family: 'Space Grotesk', sans-serif;
   font-weight: 600;
   font-size: 13px;
   letter-spacing: 0.08em;
@@ -2811,7 +2811,7 @@ body.profile-switching > *:not(#profileSwitchOverlay){pointer-events:none}
   cursor: not-allowed;
 }
 #sessionExpiredLogoutBtn {
-  font-family: 'IBM Plex Mono', monospace;
+  font-family: 'Space Grotesk', sans-serif;
   font-weight: 500;
   font-size: 11px;
   text-transform: uppercase;
@@ -2844,7 +2844,7 @@ html[data-theme="light"] {
   --bg-app: #f3f4f8;
   --radius-card: 14px;
   --radius-control: 10px;
-  --font-ui: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-ui: 'Space Grotesk', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   --panel-shadow: 0 1px 2px rgba(15, 23, 42, 0.04), 0 12px 32px -16px rgba(15, 23, 42, 0.12), 0 0 0 1px rgba(15, 23, 42, 0.05);
   --card-shadow: 0 1px 2px rgba(15, 23, 42, 0.04), 0 24px 48px -24px rgba(49, 46, 129, 0.22), 0 0 0 1px rgba(15, 23, 42, 0.05);
 }
@@ -2857,12 +2857,14 @@ html[data-theme="dark"] {
   --stat-box-bg: #141b29;
   --radius-card: 14px;
   --radius-control: 10px;
-  --font-ui: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-ui: 'Space Grotesk', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 }
 
 body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  /* Equal-width digits so marks, percentages and times line up in columns. */
+  font-variant-numeric: tabular-nums;
 }
 
 /* ---------- Layout: app screens start at the top; only login is centred ---------- */
@@ -3433,15 +3435,15 @@ button#loginBtn {
 
 /* ---------- Bottom navigation ---------- */
 .bottom-nav {
-  gap: 2px;
+  gap: 10px;
   padding-top: 6px;
 }
 
 /* All tabs share the width when they fit; below that the bar scrolls. */
 .bottom-nav-item {
-  flex: 1 0 60px;
+  flex: 1 0 auto;
   min-width: 60px;
-  padding: 7px 4px;
+  padding: 7px 10px;
   font-size: 10.5px;
   border: none;
 }

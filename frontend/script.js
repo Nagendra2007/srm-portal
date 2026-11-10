@@ -324,7 +324,7 @@ function hideProfileSwitchPopup() {
 
     const renderProfileFields = (fields) => {
       if (fields.length === 0) {
-        return '<p style="font-family:\'IBM Plex Mono\',monospace;font-size:13px;color:var(--ink-muted);text-align:center;padding:16px;">No profile data found.</p>';
+        return '<p style="font-family:\'Space Grotesk\',sans-serif;font-size:13px;color:var(--ink-muted);text-align:center;padding:16px;">No profile data found.</p>';
       }
       const rowsHtml = fields.map((field) => `
         <div class="profile-field">
@@ -623,12 +623,12 @@ function hideProfileSwitchPopup() {
     const renderProfileDisplay = (tableHtml, photoTag, isCached = false) => {
       const fields = parseProfileFields(tableHtml);
       // completely remove profile photo from the profile section
-      const liveClassMarkup = `<div id="liveClassWidgetContainer">${currentTimetableData ? renderLiveClassWidget(currentTimetableData) : '<div style="font-family:\'IBM Plex Mono\',monospace;font-size:13px;color:var(--ink-muted);text-align:center;padding:16px;">Waiting for schedule sync...</div>'}</div>`;
+      const liveClassMarkup = `<div id="liveClassWidgetContainer">${currentTimetableData ? renderLiveClassWidget(currentTimetableData) : '<div style="font-family:\'Space Grotesk\',sans-serif;font-size:13px;color:var(--ink-muted);text-align:center;padding:16px;">Waiting for schedule sync...</div>'}</div>`;
       
       let cacheIndicator = '';
       if (isCached) {
         cacheIndicator = `
-          <div style="margin-bottom:12px;padding:8px 12px;background:var(--accent-soft);border:1px dashed var(--header-border);border-radius:6px;display:flex;align-items:center;gap:8px;font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--ink-muted);">
+          <div style="margin-bottom:12px;padding:8px 12px;background:var(--accent-soft);border:1px dashed var(--header-border);border-radius:6px;display:flex;align-items:center;gap:8px;font-family:\'Space Grotesk\',sans-serif;font-size:11px;color:var(--ink-muted);">
             <span style="display:inline-block;width:6px;height:6px;background:var(--accent);border-radius:50%;"></span>
             <span>[Last-Known Cached Data]</span>
           </div>
@@ -748,7 +748,7 @@ function hideProfileSwitchPopup() {
 
     const renderAttendance = (subjects) => {
       if (!subjects || subjects.length === 0) {
-        attendanceContent.innerHTML = '<p style="font-family:\'IBM Plex Mono\',monospace;font-size:13px;color:var(--ink-muted);text-align:center;padding:20px;">No attendance data found.</p>';
+        attendanceContent.innerHTML = '<p style="font-family:\'Space Grotesk\',sans-serif;font-size:13px;color:var(--ink-muted);text-align:center;padding:20px;">No attendance data found.</p>';
         return;
       }
 
@@ -810,7 +810,7 @@ function hideProfileSwitchPopup() {
       let cacheIndicator = '';
       if (subjects.isCached) {
         cacheIndicator = `
-          <div style="margin-bottom:12px;padding:8px 12px;background:var(--accent-soft);border:1px dashed var(--header-border);border-radius:6px;display:flex;align-items:center;gap:8px;font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--ink-muted);">
+          <div style="margin-bottom:12px;padding:8px 12px;background:var(--accent-soft);border:1px dashed var(--header-border);border-radius:6px;display:flex;align-items:center;gap:8px;font-family:\'Space Grotesk\',sans-serif;font-size:11px;color:var(--ink-muted);">
             <span style="display:inline-block;width:6px;height:6px;background:var(--accent);border-radius:50%;"></span>
             <span>[Last-Known Cached Data]</span>
           </div>
@@ -904,7 +904,7 @@ function hideProfileSwitchPopup() {
        -------------------------------------------------------------------------- */
     const renderInternalMarks = (subjects) => {
       if (!subjects || subjects.length === 0) {
-        internalMarksContent.innerHTML = '<p style="font-family:\'IBM Plex Mono\',monospace;font-size:13px;color:var(--ink-muted);text-align:center;padding:20px;">No internal marks data found.</p>';
+        internalMarksContent.innerHTML = '<p style="font-family:\'Space Grotesk\',sans-serif;font-size:13px;color:var(--ink-muted);text-align:center;padding:20px;">No internal marks data found.</p>';
         return;
       }
 
@@ -931,7 +931,7 @@ function hideProfileSwitchPopup() {
               ${componentsHtml}
             </div>
           `
-          : '<p style="font-family:\'IBM Plex Mono\',monospace;font-size:12px;color:var(--ink-muted);">No component-wise breakdown available.</p>';
+          : '<p style="font-family:\'Space Grotesk\',sans-serif;font-size:12px;color:var(--ink-muted);">No component-wise breakdown available.</p>';
 
         return `
           <div class="subject-card internal-marks-card" data-marks-index="${i}" style="cursor:pointer">
@@ -949,7 +949,7 @@ function hideProfileSwitchPopup() {
       let cacheIndicator = '';
       if (subjects.isCached) {
         cacheIndicator = `
-          <div style="margin-bottom:12px;padding:8px 12px;background:var(--accent-soft);border:1px dashed var(--header-border);border-radius:6px;display:flex;align-items:center;gap:8px;font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--ink-muted);">
+          <div style="margin-bottom:12px;padding:8px 12px;background:var(--accent-soft);border:1px dashed var(--header-border);border-radius:6px;display:flex;align-items:center;gap:8px;font-family:\'Space Grotesk\',sans-serif;font-size:11px;color:var(--ink-muted);">
             <span style="display:inline-block;width:6px;height:6px;background:var(--accent);border-radius:50%;"></span>
             <span>[Last-Known Cached Data]</span>
           </div>
@@ -978,7 +978,7 @@ function hideProfileSwitchPopup() {
 
       if (!subjects || subjects.length === 0) {
         currentResultsSgpaBadge.textContent = 'SGPA';
-        currentResultsContent.innerHTML = '<p style="font-family:\'IBM Plex Mono\',monospace;font-size:13px;color:var(--ink-muted);text-align:center;padding:20px;">No results published yet.</p>';
+        currentResultsContent.innerHTML = '<p style="font-family:\'Space Grotesk\',sans-serif;font-size:13px;color:var(--ink-muted);text-align:center;padding:20px;">No results published yet.</p>';
         return;
       }
 
@@ -1014,7 +1014,7 @@ function hideProfileSwitchPopup() {
       let cacheIndicator = '';
       if (data.isCached) {
         cacheIndicator = `
-          <div style="margin-bottom:12px;padding:8px 12px;background:var(--accent-soft);border:1px dashed var(--header-border);border-radius:6px;display:flex;align-items:center;gap:8px;font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--ink-muted);">
+          <div style="margin-bottom:12px;padding:8px 12px;background:var(--accent-soft);border:1px dashed var(--header-border);border-radius:6px;display:flex;align-items:center;gap:8px;font-family:\'Space Grotesk\',sans-serif;font-size:11px;color:var(--ink-muted);">
             <span style="display:inline-block;width:6px;height:6px;background:var(--accent);border-radius:50%;"></span>
             <span>[Last-Known Cached Data]</span>
           </div>
@@ -1022,7 +1022,7 @@ function hideProfileSwitchPopup() {
       }
 
       const titleHtml = data.title
-        ? `<p style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--ink-muted);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:10px;">${esc(data.title)}</p>`
+        ? `<p style="font-family:\'Space Grotesk\',sans-serif;font-size:11px;color:var(--ink-muted);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:10px;">${esc(data.title)}</p>`
         : '';
 
       currentResultsContent.innerHTML = cacheIndicator + titleHtml + `<div class="attendance-grid">${cardsHtml}</div>`;
@@ -1057,7 +1057,7 @@ function hideProfileSwitchPopup() {
 
     const renderTimetable = (timetableData, selectedFilter) => {
       if (!timetableData || !timetableData.schedule || timetableData.schedule.length === 0) {
-        timetableContent.innerHTML = '<p style="font-family:\'IBM Plex Mono\',monospace;font-size:13px;color:var(--ink-muted);text-align:center;padding:20px;">No timetable data found.</p>';
+        timetableContent.innerHTML = '<p style="font-family:\'Space Grotesk\',sans-serif;font-size:13px;color:var(--ink-muted);text-align:center;padding:20px;">No timetable data found.</p>';
         return;
       }
 
@@ -1171,7 +1171,7 @@ function hideProfileSwitchPopup() {
       let cacheIndicator = '';
       if (timetableData.isCached) {
         cacheIndicator = `
-          <div style="margin-bottom:12px;padding:8px 12px;background:var(--accent-soft);border:1px dashed var(--header-border);border-radius:6px;display:flex;align-items:center;gap:8px;font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--ink-muted);">
+          <div style="margin-bottom:12px;padding:8px 12px;background:var(--accent-soft);border:1px dashed var(--header-border);border-radius:6px;display:flex;align-items:center;gap:8px;font-family:\'Space Grotesk\',sans-serif;font-size:11px;color:var(--ink-muted);">
             <span style="display:inline-block;width:6px;height:6px;background:var(--accent);border-radius:50%;"></span>
             <span>[Last-Known Cached Data]</span>
           </div>
@@ -1195,7 +1195,7 @@ function hideProfileSwitchPopup() {
        -------------------------------------------------------------------------- */
     const renderCourses = (courses, filterText = '') => {
       if (!courses || courses.length === 0) {
-        coursesContent.innerHTML = '<p style="font-family:\'IBM Plex Mono\',monospace;font-size:13px;color:var(--ink-muted);text-align:center;padding:20px;">No course records found.</p>';
+        coursesContent.innerHTML = '<p style="font-family:\'Space Grotesk\',sans-serif;font-size:13px;color:var(--ink-muted);text-align:center;padding:20px;">No course records found.</p>';
         coursesCountBadge.textContent = '0 Subjects';
         return;
       }
@@ -1214,7 +1214,7 @@ function hideProfileSwitchPopup() {
       coursesCountBadge.textContent = `${filtered.length} Subjects`;
 
       if (filtered.length === 0) {
-        coursesContent.innerHTML = `<p style="font-family:\'IBM Plex Mono\',monospace;font-size:13px;color:var(--ink-muted);text-align:center;padding:20px;">No courses matching "${esc(filterText)}".</p>`;
+        coursesContent.innerHTML = `<p style="font-family:\'Space Grotesk\',sans-serif;font-size:13px;color:var(--ink-muted);text-align:center;padding:20px;">No courses matching "${esc(filterText)}".</p>`;
         return;
       }
 
@@ -1616,14 +1616,14 @@ function hideProfileSwitchPopup() {
       if (currentTimetableData) {
         renderTimetable(currentTimetableData, activeDayFilter);
       } else {
-        timetableContent.innerHTML = '<p style="font-family:\'IBM Plex Mono\',monospace;font-size:13px;color:var(--ink-muted);text-align:center;padding:20px;">Loading schedule...</p>';
+        timetableContent.innerHTML = '<p style="font-family:\'Space Grotesk\',sans-serif;font-size:13px;color:var(--ink-muted);text-align:center;padding:20px;">Loading schedule...</p>';
       }
       try {
         const data = await ensureTimetableData();
         renderTimetable(data, activeDayFilter);
       } catch (err) {
         if (!currentTimetableData) {
-          timetableContent.innerHTML = '<p style="font-family:\'IBM Plex Mono\',monospace;font-size:13px;color:var(--ink-muted);text-align:center;padding:20px;border:1px dashed var(--header-border);margin:10px;border-radius:8px;">Unable to load timetable. Please check your connection and try again.</p>';
+          timetableContent.innerHTML = '<p style="font-family:\'Space Grotesk\',sans-serif;font-size:13px;color:var(--ink-muted);text-align:center;padding:20px;border:1px dashed var(--header-border);margin:10px;border-radius:8px;">Unable to load timetable. Please check your connection and try again.</p>';
         }
       }
     };
@@ -1637,7 +1637,7 @@ function hideProfileSwitchPopup() {
         return;
       }
 
-      coursesContent.innerHTML = '<p style="font-family:\'IBM Plex Mono\',monospace;font-size:13px;color:var(--ink-muted);text-align:center;padding:20px;">Loading courses...</p>';
+      coursesContent.innerHTML = '<p style="font-family:\'Space Grotesk\',sans-serif;font-size:13px;color:var(--ink-muted);text-align:center;padding:20px;">Loading courses...</p>';
 
       try {
         const res = await fetch(`${API_BASE}/api/courses`, {
@@ -1654,7 +1654,7 @@ function hideProfileSwitchPopup() {
           renderCourses(currentCoursesList, '');
         } catch (e) {
           if (!currentCoursesList || currentCoursesList.length === 0) {
-            coursesContent.innerHTML = '<p style="font-family:\'IBM Plex Mono\',monospace;font-size:13px;color:var(--ink-muted);text-align:center;padding:20px;border:1px dashed var(--header-border);margin:10px;border-radius:8px;">Unable to load courses. Please check your connection and try again.</p>';
+            coursesContent.innerHTML = '<p style="font-family:\'Space Grotesk\',sans-serif;font-size:13px;color:var(--ink-muted);text-align:center;padding:20px;border:1px dashed var(--header-border);margin:10px;border-radius:8px;">Unable to load courses. Please check your connection and try again.</p>';
           }
         }
       }
@@ -1665,14 +1665,14 @@ function hideProfileSwitchPopup() {
       if (currentAttendanceList && currentAttendanceList.length > 0) {
         renderAttendance(currentAttendanceList);
       } else {
-        attendanceContent.innerHTML = '<p style="font-family:\'IBM Plex Mono\',monospace;font-size:13px;color:var(--ink-muted);text-align:center;padding:20px;">Loading attendance...</p>';
+        attendanceContent.innerHTML = '<p style="font-family:\'Space Grotesk\',sans-serif;font-size:13px;color:var(--ink-muted);text-align:center;padding:20px;">Loading attendance...</p>';
       }
       try {
         const subjects = await ensureAttendanceData();
         renderAttendance(subjects);
       } catch (err) {
         if (!currentAttendanceList) {
-          attendanceContent.innerHTML = '<p style="font-family:\'IBM Plex Mono\',monospace;font-size:13px;color:var(--ink-muted);text-align:center;padding:20px;border:1px dashed var(--header-border);margin:10px;border-radius:8px;">Unable to load attendance. Please check your connection and try again.</p>';
+          attendanceContent.innerHTML = '<p style="font-family:\'Space Grotesk\',sans-serif;font-size:13px;color:var(--ink-muted);text-align:center;padding:20px;border:1px dashed var(--header-border);margin:10px;border-radius:8px;">Unable to load attendance. Please check your connection and try again.</p>';
         }
       }
     };
@@ -1683,7 +1683,7 @@ function hideProfileSwitchPopup() {
       if (previousList && previousList.length > 0) {
         renderInternalMarks(previousList);
       } else {
-        internalMarksContent.innerHTML = '<p style="font-family:\'IBM Plex Mono\',monospace;font-size:13px;color:var(--ink-muted);text-align:center;padding:20px;">Loading internal marks...</p>';
+        internalMarksContent.innerHTML = '<p style="font-family:\'Space Grotesk\',sans-serif;font-size:13px;color:var(--ink-muted);text-align:center;padding:20px;">Loading internal marks...</p>';
       }
 
       // Unlike Attendance/Timetable, this always does a live fetch instead
@@ -1706,7 +1706,7 @@ function hideProfileSwitchPopup() {
           previousList.isCached = true;
           renderInternalMarks(previousList);
         } else {
-          internalMarksContent.innerHTML = '<p style="font-family:\'IBM Plex Mono\',monospace;font-size:13px;color:var(--ink-muted);text-align:center;padding:20px;border:1px dashed var(--header-border);margin:10px;border-radius:8px;">Unable to load internal marks. Please check your connection and try again.</p>';
+          internalMarksContent.innerHTML = '<p style="font-family:\'Space Grotesk\',sans-serif;font-size:13px;color:var(--ink-muted);text-align:center;padding:20px;border:1px dashed var(--header-border);margin:10px;border-radius:8px;">Unable to load internal marks. Please check your connection and try again.</p>';
         }
       }
     };
@@ -1716,14 +1716,14 @@ function hideProfileSwitchPopup() {
       if (currentResultsData && currentResultsData.subjects && currentResultsData.subjects.length > 0) {
         renderCurrentResults(currentResultsData);
       } else {
-        currentResultsContent.innerHTML = '<p style="font-family:\'IBM Plex Mono\',monospace;font-size:13px;color:var(--ink-muted);text-align:center;padding:20px;">Loading results...</p>';
+        currentResultsContent.innerHTML = '<p style="font-family:\'Space Grotesk\',sans-serif;font-size:13px;color:var(--ink-muted);text-align:center;padding:20px;">Loading results...</p>';
       }
       try {
         const data = await ensureCurrentResultsData();
         renderCurrentResults(data);
       } catch (err) {
         if (!currentResultsData) {
-          currentResultsContent.innerHTML = '<p style="font-family:\'IBM Plex Mono\',monospace;font-size:13px;color:var(--ink-muted);text-align:center;padding:20px;border:1px dashed var(--header-border);margin:10px;border-radius:8px;">Unable to load results. Please check your connection and try again.</p>';
+          currentResultsContent.innerHTML = '<p style="font-family:\'Space Grotesk\',sans-serif;font-size:13px;color:var(--ink-muted);text-align:center;padding:20px;border:1px dashed var(--header-border);margin:10px;border-radius:8px;">Unable to load results. Please check your connection and try again.</p>';
         }
       }
     };
@@ -2215,7 +2215,7 @@ function hideProfileSwitchPopup() {
         showSection(profileSection);
       } else {
         updateHeaderProfilePhoto('');
-        profileContent.innerHTML = '<p style="font-family:\'IBM Plex Mono\',monospace;font-size:13px;color:var(--ink-muted);text-align:center;padding:20px;">Loading profile...</p>';
+        profileContent.innerHTML = '<p style="font-family:\'Space Grotesk\',sans-serif;font-size:13px;color:var(--ink-muted);text-align:center;padding:20px;">Loading profile...</p>';
         showSection(profileSection);
       }
 
@@ -2261,7 +2261,7 @@ function hideProfileSwitchPopup() {
         }
       } catch (err) {
         if (!cachedProfile) {
-          profileContent.innerHTML = '<p style="font-family:\'IBM Plex Mono\',monospace;font-size:13px;color:var(--low-red);text-align:center;padding:20px;">Could not load profile — check your connection or try logging in again.</p>';
+          profileContent.innerHTML = '<p style="font-family:\'Space Grotesk\',sans-serif;font-size:13px;color:var(--low-red);text-align:center;padding:20px;">Could not load profile — check your connection or try logging in again.</p>';
         }
       }
     };
