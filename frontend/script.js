@@ -260,13 +260,15 @@ function hideProfileSwitchPopup() {
       feedbackSection.style.display = 'none';
       if (activeSec) activeSec.style.display = 'block';
 
-      // Highlight the matching tab in the bottom bar and keep it in view.
+      // Highlight the matching tab in the bottom bar. The bar is only scrolled
+      // when the user taps a tab (see the bottomNav click handler): scrolling
+      // here made the bar jump to its far end on page open, because the
+      // default section (Profile) is the last tab.
       document.querySelectorAll('.bottom-nav-item').forEach((tab) => {
         const isActive = !!activeSec && tab.dataset.section === activeSec.id;
         tab.classList.toggle('active', isActive);
         if (isActive) {
           tab.setAttribute('aria-current', 'page');
-          tab.scrollIntoView({ block: 'nearest', inline: 'nearest' });
         } else {
           tab.removeAttribute('aria-current');
         }
@@ -2802,6 +2804,8 @@ function hideProfileSwitchPopup() {
 
       accountMenu.classList.remove('open');
       window.scrollTo(0, 0);
+      // Bring a half-hidden tab fully into view when it is tapped.
+      item.scrollIntoView({ block: 'nearest', inline: 'nearest' });
 
       if (action === 'profile') {
         showSection(profileSection);
