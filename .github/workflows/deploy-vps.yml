@@ -1,0 +1,60 @@
+name: Deploy to VPS
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+# Never run two deploys at the same time
+concurrency:
+  group: deploy-vps
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - name: Deploy over SSH
+        uses: appleboy/ssh-action@v1
+        env:
+          PM2_APP: ${{ secrets.VPS_PM2_APP }}
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          port: ${{ secrets.VPS_PORT }}
+          username: ${{ secrets.VPS_USER }}
+          password: ${{ secrets.VPS_PASSWORD }}
+          envs: PM2_APP
+          command_timeout: 15m
+          script: |
+            set -e
+
+            # Non-interactive SSH sessions don't load the shell profile,
+            # so make node / npm / pm2 available if they were installed via nvm.
+            export NVM_DIR="$HOME/.nvm"
+            if [ -s "$NVM_DIR/nvm.sh" ]; then . "$NVM_DIR/nvm.sh"; fi
+
+            if [ -z "$PM2_APP" ]; then
+              echo "VPS_PM2_APP secret is not set. Running PM2 processes:"
+              pm2 list
+              exit 1
+            fi
+
+            cd /root/srm-portal
+
+            echo "==> Pulling latest code"
+            git pull --ff-only origin main
+
+            echo "==> Installing dependencies"
+            npm install --omit=dev
+            if [ -f backend/package.json ]; then
+              (cd backend && npm install --omit=dev)
+            fi
+
+            echo "==> Restarting PM2 app: $PM2_APP"
+            pm2 restart "$PM2_APP" --update-env
+            pm2 save
+            pm2 status
