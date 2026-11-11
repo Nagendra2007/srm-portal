@@ -4,10 +4,11 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>SRM SYNC</title>
-<meta name="description" content="Super responsive modern student register and attendance portal with light and dark mode support.">
+<meta name="description" content="An alternative student portal for SRM AP: mark attendance, plan attendance, and check your timetable, marks and results.">
 <meta property="og:title" content="SRM SYNC">
-<meta property="og:description" content="Super responsive modern student register and attendance portal with light and dark mode support.">
+<meta property="og:description" content="An alternative student portal for SRM AP: mark attendance, plan attendance, and check your timetable, marks and results.">
 <meta property="og:type" content="website">
+<meta name="theme-color" content="#151920">
 
 <!-- Favicons are real files (not data: URIs) so browsers and search engines
      can fetch them; /favicon.ico also exists for the automatic request. -->
@@ -15,365 +16,81 @@
 <link rel="icon" type="image/png" href="/favicon.png" sizes="96x96">
 <link rel="apple-touch-icon" href="/apple-touch-icon.png">
 
-<!-- Theme is resolved before first paint. Reading localStorage from the
-     script at the bottom of <body> meant the hard-coded data-theme="dark"
-     painted first and light-mode users saw a dark flash on every load. -->
+<!-- Theme is resolved before first paint so a light-mode user never sees a
+     dark flash. Same storage key and default as before. -->
 <script>
   (function () {
     try {
       var stored = localStorage.getItem('theme');
-      var theme = stored || (window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark');
+      var theme = stored === 'light' || stored === 'dark'
+        ? stored
+        : (window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark');
       document.documentElement.setAttribute('data-theme', theme);
+      var accent = localStorage.getItem('accent');
+      if (accent === 'teal' || accent === 'violet' || accent === 'graphite') {
+        document.documentElement.setAttribute('data-accent', accent);
+      }
     } catch (e) { /* private mode — keep the markup default */ }
   })();
 </script>
 
-<!-- Typography.
-     The stylesheet was render-blocking: the browser would not paint until it
-     had made a round trip to fonts.googleapis.com. Loading it with
-     media="print" and flipping to "all" on load makes it non-blocking, and
-     display=swap (already set) means text still shows in a fallback face
-     while the webfont arrives. -->
+<!-- Webfont is non-blocking: it loads as print media and flips to all once
+     fetched, with a system-font fallback (display=swap) in the meantime. -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap" media="print" onload="this.media='all';this.onload=null">
-<noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap"></noscript>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" media="print" onload="this.media='all';this.onload=null">
+<noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"></noscript>
 
-<!-- HTML FILE: Page structure and JavaScript. All styling is loaded from the separate style.css file below -->
-<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="css/system.css">
+<link rel="stylesheet" href="css/app.css">
 
+<!-- No build step: the app is plain ES modules. Preloading flattens the
+     import waterfall into one parallel batch. -->
+<link rel="modulepreload" href="js/main.js">
+<link rel="modulepreload" href="js/shell.js">
+<link rel="modulepreload" href="js/lib/dom.js">
+<link rel="modulepreload" href="js/lib/icons.js">
+<link rel="modulepreload" href="js/lib/storage.js">
+<link rel="modulepreload" href="js/lib/api.js">
+<link rel="modulepreload" href="js/lib/store.js">
+<link rel="modulepreload" href="js/lib/ui.js">
+<link rel="modulepreload" href="js/lib/schedule.js">
+<link rel="modulepreload" href="js/lib/attendance-math.js">
+<link rel="modulepreload" href="js/lib/widgets.js">
+<link rel="modulepreload" href="js/views/login.js">
+<link rel="modulepreload" href="js/views/home.js">
+<link rel="modulepreload" href="js/views/mark.js">
+<link rel="modulepreload" href="js/views/attendance.js">
+<link rel="modulepreload" href="js/views/timetable.js">
+<link rel="modulepreload" href="js/views/courses.js">
+<link rel="modulepreload" href="js/views/marks.js">
+<link rel="modulepreload" href="js/views/results.js">
+<link rel="modulepreload" href="js/views/feedback.js">
+<link rel="modulepreload" href="js/views/profile.js">
 </head>
 <body>
 
-  <!-- Sticky Top Application Header -->
-  <header id="appHeader" class="app-header">
-    <div class="app-header-inner">
-      <div class="brand" id="brandHomeBtn" role="button" tabindex="0" title="Go to Profile">
-        <span class="brand-logo">
-          <img class="brand-logo-img brand-logo-dark" src="data:image/png;base64,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" alt="SRMSync">
-          <img class="brand-logo-img brand-logo-light" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAYAAACqaXHeAAAACXBIWXMAAAPoAAAD6AG1e1JrAAAgAElEQVR4nN17CVhbVdp/AmodR53RfkpL95Z9C1sIgbBD2AlQCIFAIAQSCCFhXwqlrcVabXWsjtVxxs91tNZxmRlHq3Ws7dS9tbSlkD25a8IOxS5AyPmeE3MxxTp25lPn+//P89wnN7n3nnve33mX33nPGxrtZ2pczizd4/av3D3vRG7icmYdBzynjjV3Tt7svObO5cy6wftp/y837rUC/1vC/G+f/4+0lbf90Q0O+pof3d1pjz2svbu8aCgmL01bkxpruD8xyvgMJ9x8ONIfO5zEMr6SFG18PCtJ3yUsGi6U1wz7AgDcaG70a8CAB+3/suBczuzSAAEA9GrhcGJGgv7xuEjzIDMAm470x0Yj/PCzbAbyl5hQ89Mxoci+UG+8Py7C9FhUEPJiVBB6jBmAGcJ88anoENSSFG1+j8fVy/t36NfS3NyW3uX6nv9443Jm6UsDcqPT+rp1m3NS9ftjQlEi0h8fYwbir6fGGip29SCbR0Yu3/Hh0dn/6u0w+daK1Jxa0VCOIH84V1I+lF1XrWX395l83nxt7N7fH8RWlW0diuWEo7si/IgBZgA+mxyNfFgl0ObRbr7J9b3fovKfaB6UStJpNIV0yDuFbT7ECsYvMwOID7OS9FlaAFbs30OsK87VSpPZprfYDMTIDESnmIHYKDMQMzMDsKFQb+IcKxjVRAVhSFQQNsoKRkfZDGyQG2d+rlKgKXruD/jqNtWFLYlRyP3MQGI0LgLX8PO0QtpN37z6O+b2czVP54v//ObgL1JjzQdYQZbLzEDycJN8cPMnKPqLnBSDnM3AzjMDiGk2AzvNCUf2p8aa8gT5w1uOvD1/K83djUaj0x3gOdTb3Z12YL/ll/kZGr+kaFNxfCT6RFQQPhgbhk2lsNEjIr4647VXv/hVfCRSxw6xjCRG4V+KyzRh8PmfNWpwKdWj02iFWRouO8RCRAZYviwrHPJ76YVTt8dH4vuZgeR0dDAxEBeBKOqrh1e72q9LPzDcOUIg7A/6kO/c5OZGKy0Y9oezzwoiUU44oSnKNpQcPnz49rgI4oHoYOtcAhPbCcFz9vnTmsRKapDu7rTEKPTByADrAiccl9NuuZmWwkY7mYGWGU44cbQwSx+3zGm5wTivrP/4X1JX+Ax1DqMCNw6pYjMsxphQy4CwaDCInzfoxwy0IvGRxIm9/Wfu/EkdJNeJ7qlTp26OCcXfZwZa8FrRwAZh0aAPK8iqjQklzxdkaJOo0EVFheWquasHuauva4S1rXWksq2R6FHK0Eea5ciLqjrssKIW/aOiFturlBF5e3aO3EE94716ZgXVzw4A3JKjsd7oYOvl5Gh8JwQ/JpR8ixVksdRVn9r0k4Cw0jnz+/YM/TLSnzzPDiE+hd44gYlJ2QzLAjcO2Uk5JYrJuQBHP/L2vNvhl8c8Hrofi+/vIwq2d1jSe9ot4ds7iU2NUuOqJrl5TbsSD2iWo7lKGX5fnRg9Vl+Na+USy4vNciyc6kshuXwLdS4uG/Rnh1g0sWHkCdqKW2iccOzhSH/rJVnVGT94/UfjDFzOLB0C8P4RbEVkAKlhM/AjUHhOOPEkJ8wyIywa4jgdkYP5Uc9AIKB9w9+OvD1/y5G/Ta3dv9fgUNMbaTu6yEClzHqwvto61iCxHtrVa/SAv/d1XnHQaMc9ALglsfA3YkIt2DtAuyI11tzPCcfn5DXn1/4oPoHLmaU7vL27Gy3Sn/yUFYx/RFtxM40VRL7OZpCmrtaB1ctt9TvIQ09/g62q9MItTgGXBr5nJ7lRLrH8rV48Ot3WSG51jsvBCh1m4e5GS4lBnmCHWCbfAWAFJ5w4EBVoJR97ZPC2pXv+3eYJhafTaJH++DNhPhYD7ZabaLFh2KtxEbjhdwc/+eXSPd8C5hj4yRPjt4lKBovS47UHE6MM7yZGGd5PjdV/kJmoO8pL1x4t4WmOikrU71cL9e/LJcjhpnqyfc9O3McVeHhAMKjfVHVEXZ14FDTWEn3Ue5dotxudFhuGw1BsgeYQHUx+EBVEfAAd8b/NEzycM5nEMpaH+1rAO1rtitgwdHd0MDn6h6dMDlVepvIO7l6UMyiKCTXrw3xIEOptAcxAHCQwUcDlICAryQy2ZhtBaYEBVBSbQWUJCqrLCCAVjYA6MXGlVWF9+NWXDQ47p2bOGeMdQrQqzGny6nHQUIM9AL87tQW+26Gl8ZHYm+wQ4iQEIdzXOpnARNqcffxr/mDlbX90xGVlnd4DCp+RoE/JSdElRAVagEKqvsbTwgE6gHBzo6XGqn8T6U8CH08L8F6N23zXYnMhXsjVCH/z1egQ09XEKONVbpz+ak6q7mphlvaqIF87V8HXLlQKdAvVQiNQSi+CtsaRY0fenr99OblpU1x2mJmqzpDaIJkByjqzAn5/bP9Vh5rD8cD1R3QwYYoJxXpqRQNerCArqC7Tef/LtNkDCkSn0yL8iPfCfYlDtJtvhj5gPidFXwSvU2q1NEA6ncaNU3dH+FnAFg9s3scTW/ReTSwGbyZBdDABEpgY4HJQkJdmBsW5JlBWaALlRYhDC8qLtItVAj2oqTDZa0XIXIv8EmhXWt+EfULhXMdFgVAnNqjk1dOgTWlgwu8wylAC1kvOb44OJh0TxQnH9zIDidNQM284Kng4b+RxtakML8sC9PjhvuQrcRHon2FHlDrCl8LPl5+f89yzE6vx8USvbvEgFr1XY4teq0gQ5osDNsN4MiFKuy81VreTG6fbkZum2VGQod0pyFfvFJepH64q1X0iLsVAVakBSIQmIKtEgawKm29rvAT6OidE1Ay7js/hF+h0WnWZ+bhUhBsBAA6nueSwaTRaRoKxLdzXooETF+5rnUmPNxbdsClwnbbMDMDVEX6EsihH5xfhR853NqtXUpSVUqn+PovHfT0zb2zNHnrda9UI8F6NLXitIheDNhFzedzhCoqifm9zo9MapeZqSTlqkwjNi7UixF4vxheV0onFVsUY8sfnR35JOUTqkd7udxwq39ls9JVVTgBFrclh55BlLq1M3d1pzEDCFB+JCVJizMVRQQQOzeO6dNu1UQgVZGozQr0tM3D2I/0tnydFm7fD3ymE4SDgZ4dq7Oi21oljYT6GowHrrXbv1dhcyBYLSIrW9FL3/9AB72uoMbbJKkdArQi5WleFL8gl+NW2xll7X+dkObzuGg1ctUJcpj8sKUcvPvnY2B2UCVAyFGZpM5mBpJV20020CD8rUpBhKHW9ft3m4XBmdFpcBPpJdDDRLchXB7KCyMkXniF/Qc089fJd28YTu5ovg572iccYXsYB37UW4LUKswdvRq+2KXVrnTH4nyJOzdjfj2pvrhcjo831l0FT3QxobZgFsO925bj+lRfnVkAAqJmnAIDPKesMLFnlFGiU6athuL5vO37bt3K40dghxPk0DiJIZKHVsWH4IPzte8e00qkeqjrjRmYgcemN10Zui/Qn3mAzsAddZ9+BIJ1O62qe+EuH6vLizu6ZJ8J8DMcDN1gWvVbhIGgTMnNgP7GSEvCHAKBIVFujJaurabatWW5tblWMtnYoJ1t72qabAQDXzBgUYGlR5UaniUo0WnGp8axcYnqjuxVNoggV7DuFjZRGBpDnPv145NaoQMvFWpE+mOrjO4PxpASMM+wI9bJ+oNW+syLSnxyXlOvWUwBRAj3z1PR/tTSMT7cqLoGetpmTmYkX+kO9rcB7NTrH8MLtZVvPsVyd0vdqG9Xc3WmdrUfvkEne9WxpPLG+uvz4epn44/Uq+ckNHU1aRnerKWxHNxHw0rNzd1GPKKQakYivf6eEp8VKeEYg4uNAKdNHuGgI/Q9PmaAMRFXpBe/YMOJP2cmmR50A3PS9zo8Tjp6JDcOEGQnG4kh/8jMq4eDq+ffvmWS1NU4DpXTc1qGcXdzVY63xX4+cCfUmQeBGYiEmVP83ajl8PRAo4Xu737knmvF5b5jv6VOhPmcvsYLVIJGlBpmJalCQqQZlhWpQwR8GVQItqBbqgKzKPKaUWd7tbR8rbGn8ck1emn6An4eAFLbxKo+rt9WJ1SGULNR7I/yIl+MikB3ZyaasBCamhYTpO86Q65zZB/uxu1nB+FSbUvNf7BDsdU440uM6k5T9P7J3itOhmgGqulFba8O0vUN10bS901QYuBH53H+9AwQQG6Z7rrvt3D3LhaY+OZF/5/lvPIn7rD0NfNedBv4bzoCgzYOA4aW1s0M19pQYjT0zUWMvyFTb+Xkau6hEAyRCM6gXj4Lm+mnQrpw8dOyDsZXZybq3s5JQkJGgs21r0zGoiXI6O3oy27SVGUh8CWWLDSPGu1uRNa4y01wHxc9Tp0f6E2aYfIj0J/TcOEMk/N3Fwzo+nzxwcU2bYuJqs3wCqOpGFlsbLoIO1UXk/h2jspSYwb2+a7Vo0CYLCNxomsxMGqyBIQg+d88vP3TYezzraKn3muNg06rjwHvN8QXf9Z/aAjaeWgjafM7O8NKB2DAtSGZrQVayBhRmaYAgXwNEJRqbRGhcqBWZbfVifKG98TJoU0yd/eQfs3elcXRvpccjQFZ1Zgs1TkpA4VbdvcxAEjt4AL+bzSDOFefqi533fGuC3xIIfW+kP/HuvvvJe6KCcKS38+xty9H6Jh0GneD4ifbGr+1K2ahNJRtZbK6fAhCIvs7Zv+zqsapSYs/s8V5zwRi0iQCBm3RDfN6ZPKh+3MR3gr3WHAPr73nPvsXz7/Pea04A3/Wf2gM2DgGG9zAI89Vc5YRrrqRx1FeyU9RX+HnDV8qL1AuSchTUVpCgVmRabJAQoFFKzrUrHZHiIxjqctPUh6qF569xco5xu9Fp0cHEcLVQHRUTij+fnWx82FVmmuuXRJbpRWYAtldcqmVHBeFnHBR3mSenzOC+3nEuDFVK6fi8qm7ErpSN2BulVjsMYRCM7paZD7d3WrrzM77a4bP27Hm/dSbA8NL9PT/zH02hfu+/vdHjPdtGj3+Azas/sgdsPA1YIWcfrxF9EiWv+WKDsOjsOrimh0dDjW5dT7veq01p5sklyAl59SioF2OLSqkVKGXW+e6Wy6Cvc1IKfc6+PdbbXcdKycVm4O/nZ+gq4yLQljSO+a/Qr10DgMftXzkWEjGh6Jm4CHNdQaa2jB2Cv+3aiWujiFBv+1g/BEElGwNK2ciCUjpiV9RYbXIJYVfUTIIGyQRQSkfOdreQD5QWnt4WsPGrz7w8z16KDDz3bh735COBm48f8fL8AkQzPu9zZId/oMExKmXEa421k6ChhnRoXqtiZrFDNW5yZJqXaeu3AGC/z0w09nHjDMVxEZge9nNNKFwJvSIdMkD1w8KiC5FJ0abdzADiELU3d73BUDbU0zbW2towfQWGREWtFcglxEJ9NW6XitBFSblpsaacADXlI0AqQvHmBuRJsfDL3qDNn7/ns/YUFu536v3s1I/7oWl43P7VLTB+UyvR5Yes6ozDfxzYj/66UWoZUdSOzEMNaKofmetqnl3cd/9UsquGUgBAGaKCiAdjw7BDknK1f0GG7olrNJvrPOnt0N8pq9KJG2Xn7hUWXVBWC4dqnNe/l81R8XTf/WOBnU3T/62Ujl1RymaArJIENeXIAgSgusy4KCrR2ir4eiDio3D1N1NfbXylUnBqZ4j3F4d81n1mDPf/pNulTzqlYcsbRYmb6vHD0P7bGmdBV9Nl0NdxBezomnrK9R5X514rOp8tyFc/sK3NcK+iFhF1txp/tSS7p3OGYfYmJ3kCsILNf1HVq/MKs5CXk9n6pyGZWK5ay0BY+n3Pzkm/lobRA/VicrJePAGqyzAgKtHZKvham6AAhjStjZeuBYVZBpCXprNVCobeys/8os1vw4nP46NO7nv0oRkmlUJzpd0u73J495YGK6u14WtFU/1IQ6tioqGn9YpiW+tEznfG6eZGK+EN7xNuRV+VS85XxUWY3uSlTQMeV/u7pQnkOlU5PUHTEBcxMskJN95fVXohrrTA0CAoGMr6vlw+DJX39Uz//sHdkysh0q7I739gdE2jlNwmESI6mPER8c2gKEcLeOnahZwU7WJGgtaWFK0FqTFGkBStv8jLONXLDjv6eNnWgUGJ0HSsq8XMpYjU9YC44QYAHYb2Ep6pQVw2WJgUbehPYo1M8LhqFbzseY1502m0FsVwHOTNKWxTHysY3Qd/Xp5IoAbT3zdZ2Nt2BXSoRg/BWYMAuBAQR/vdby23NUpRgbhMf5Sfp7UL8g0gK0kP0jgQAA2ICdPYwnx1ICrIABKjP29tUX7UJC5DQHUZAurE5g+6WsiM6wEBNQG+z/W4HkiUgMlsgziZbTwE1xXNckPcdxK1Hs4okBprPpqVZCrnpevFsWH4keVOkMoDzEzbb+puGR9qVczYHIRESbTC65QWwPuu0Rw6naaq04WL+OpHCzI1lpxUPYgJ1dmZgVoQ6q1dDNw0ZA/ecmH2qd+e9RaXagdEfJO9WoiCuioSJkE/6mm35v47GkE5QU44tj+NgzxRXqRNzEw0f+6MAt+iQAmZEoO8yQwk7qsW6uLYIcRpp7dccoKUgLu3T1X2tF4BTfVjCyrZ+IKqbnyxsxnjwGuuDowarCv33rNLfbewaLAfmgDDW7cYvGUYBG46uxC0SQ8SWCeVilr0KYnQCtNkc+JSw2Jd1QhokIwBVZ31Hzu6JvJcfMQPbogu8Zso7KXsZFNbRgIiSolBP3aub77LBLOSTPezGcRrcD3PCSeMR96eXz779Lf+NP+r7R3TVkhAWhrGFiEVbpCM2RW1xMiuHmLD8gyOy/PXVI6kx59/gRloAIGbztsCNg7Y/NYN2SODPnmpqR79g6xyBlSXGa/CKCIVoTYYUpXSCdDSMA06lJMndvdO86h+/lmW55vcJg2mzD8uyNDncjnoHh7X9LxzPN9qKIUGP0/LZzPIQQDALbFhBFKYZfBajvbvn5j79eOPXEre3jnxXGcTpMIjtkbpyMKunomqvi5sLYzX0BdANQO0bw74LPWZEjN4K1wTZCWfEUQGGID/hrMLfutP23zWngMM32PvPf7IKE8pHRmQikaBrNIC+QPk/na5hFhsqCEXW+QzoL3xEmSarz/9xOTd1OR8Hwgw2cJmECa5RLuFy8GOlBYYWlwnnebaQaNUvZHNICdgMoQTjp9MjUXLXW+Ggn309xlHfuDhB6ZzoBmo6kbm4KCa6skXaDfa3Oi0+KizrwVtggCcsfms+8zmveaUnR368SGG91d/SYo+f6Cvy7qzuX5ysLF2Bsglo5Bg2RS1FrtS+g3gkAd0KCcHYI7geuZAmS6Pawhhh5DGV1823J4ejyESoTna9fpS+2abyZ2WyMJMPK4pNjUW6WMzyJcoAOAMwvPf/oaMg5z7+WfG7+xsmhhpkU8vNkohLZ0GzfWWI92tePyzT497vvWn8VUvPouvgpuir7yIecDzZ57Wr1bJvwhKTzh7kOGtg8Lb/dZ/Cbw8T9q8134O+PknykJ9hj+EK0mfNWpNZenpHTu6Jva0KaZ1LQ2XQKN0DDRKrTalbBQoakfmoAPuah4/DP3C8mjlLMWjJ0djPZxw4rU6MeKTmYiOfPbxwvV5jedSygt9NiaUPCgu0/lEB1sQ6Adc2dnObXhMf581Fp7f1zOlhL6gsdY6Vy/GbQ2ScSCtxEFNuf5rSbn66wr+0Cyfd2GWl35hNj1+6OvU2AuzMOkR7gdt/6zdf8Np4L3m07nNq06DYO/jJ6Cnh6aTm3a2MmCDCQ/ebAEBG7Wn5DUD2/q3X3yos+ki3qa4DIVfVErHgKJmbKG9cRbs3TXJguNxjQ7UqjU2jDidHm/m5aSau4uyTe99xwFSjUJQuFWXzAqykDAjzAqy6NI45nTXpAjc3+9qQbvodLqDDLUrx16G6iirwmFa+2q10LhQWaIHggItKMjUgvQELUhk6UA0QwfC/fQgeItmMWjz4FzAxoEFn3Wf27zXnAUBGz/VpSd+tJbi/dT+YhpnqMN/PTLnu9YKgrcYP2iSDzfs7P76BbhvALNRjbWj0BTsPW0T+5eFYYdJlG3V+bAZpBVym6wkVCMuNQqd168fRrnQWQFwEyecsHA5ZnZyNNrOCSeOUKhRCDfVm7cpZeY4eG7UL7p3No3/RlEzZpNXTwGpyAIgmaksMYISng7w0nUgM0kHUmN1gBOhA5EBehDiZQABG6EJnAMMn1N/Ld36kWM7mxLedYAw9RXuZ3wz1HsE+K4hFpPZ57u2d8w+CdVfJRtzmMG21okjrs9Rk5XEwp6ODiafqhaagnJSkBlIzCg5rwuA59K6wPwQM9Dynnp4ZEWkv2WmRqTeTJGbb7i4eYusyvCak1B8s1ffPRbaXD/6kKwK/VBcpj9TwR8eKMoZHshJUQ+kxKg/YYWoT4T5aE6E+w2fCPMd/Bsz6Pz+3LQvUymCszycuWod1LRwP+NX3qutgOFFAj7vvKxDNT3QIp+xtylgRJj4kOIsVD3Dw3uxu9gMcmprttojJ9X85+Jco2Ox9E93i1c6B9HSYPbkhBMLHSrTKlaQ5fEUNvonSgsolGsq9HvEZboueC4VXXI4lqXmqP769vjNQ9OMh3ZfTejvm4zv6xxL2Nd/Nfbp386tuRFCA5fJ8DONo2mFwvussdj91iFndnZPboemAE2gt33yvykT+Da7jfyGzSAPP7J36p7sZNTW1oitv6FNUq4j7w/VB3+OFWR98/SX2C1Rgdb5aqE6FIrmTDm7NcnNv6gs0QxIynUOBgjX8k4N+Q5z3NE10fpNyBwHitpx0CCZAjUV5snHHtbfAX2P07QgCK5AOL5vXDnzzXZ5/FA73HXa7IHatqxC5lX1hvamuvH5DtVlsGfntGPvj8ontDQY1sdFEFea5IN3ZSWhbxRkmF+44b3Blc78f22F3oMVZLXB7WVOONGRwCSGYeICIkz5ArlEwyot0BJtSpNjy3z5ypFihSePL/yirXEMbaydsNWJ8QWJEJmvrYBEx+xYlv5Qg36JFWQ657XKCrasQhc3eyCLcolG6ViLKCd0g+dst1KVaJBjpMSgJ2PDyN2NUtQvMxFdbFHg97o62B9sXCdSKWxse3SwVQMjQnSw1ZSbau51ibGOe6qFGnFxrtZK1eW4lsvARoHV2zFWBR0W3P2trUCBuNRskwhJIK00P9uhMvnBOqLlpvP6q8StFfzzoTGhxiOBGyxQeJvXKovd29NMbmu1tEOtemDXpCMklxdrHGZYkGFQsBmkI4plJWGmwixz5w3PPtWogifofGJCSTQugmiF1VxxEVZQXqxxMCmoCdSM8/M0qpwUw0hpgTqMuuaKtgMEOp3WLLf8VSmdhfn9OXGZCVSWGBbFpSQQbtUtlBVqDfkZuqGsJP1QCts4FBtmGuKEG02RAWYQ6k0AH0/E7rUamWd4WR17Dvf1XHx+W+tYjWv1GDTTxCgSSMq160ryzPfx0hGNc0v/X88ncJ22XMFXhyaxLEBSrvZLjUXLOGGWeZX8jKM4iqoEg+flRcMVOSmGycIsnZTqgwLCaVZuBw9M/FpVZz0FKzwqBUZbZYlhobxINy/I1znKZoqyjSA31QQyEkwgkWUGrGAUBG9GF/3XYXNeq5GFgA0jIMQLMe/djcc8+tDXoa7C93bo70lkEZfgGOUSU2RxDgYk5eZ/vTrEtVHI8bgmZRKLvHoYAPeUGOzB+EiLdce2wV/Da67b3LWiC6E5qYazOanGv1YKhq4peqKSmk8fxO9qrh99BRY8wWQprBMSbjUAfp4e5KUZATfOBOIjEcBmoCDMFwMhWwhH6Av3JUFcpPEzVf35pX6h04Ofu3q0dyQwLUh6HL73xLHJ27dmwz6Noh+laJIL4zydTstNRZ5LjydM0LYSWcTvkqNJol11wVG7R9X8Oh5wd6eVFmh7c1KN5wsyDAcd0eM6Qa6vy5rcKCWekVYiA9VCAyou1RLlRRqCn6cmCzI1ZEaCjkhm64i4CONwUrT+LUHBhQpqpxjOKCU83H7LSiTQ9Hj8SVismZ+BjpUVmh9ZGvv/tnGXagXdaYVZyHt5afggLJdL4+AHkqOtU5Jyg0MVHfv1LlEAJj4E+Zr2rdm6v/HztC9VCoYU9dVDrK4Wg0eHyuTI4VOAzUzbbyXwxduudzi21Vz+OeIMtRQXYWQnEZN5adh+WDRZlIOZKoqRV52k6Mcro+dSduTuTivORd4tzsF0B4B2RUYCVpcRb5krKzQqHOXvTtQpdXc0NzpNVqUNrBaqS2sqhlX11RcU3a1Dov0PGHKe/T0ZcvqLKUe94T9r0CHDPpeEcqPTBPlmeUY8OZebitY8/8zQr0p4hKWsEH2Zqg380cvnuU6KCQUt4aHPl/Dw6c4m3F+QrwlOj7OghZnYsWa50ZdSdzhYqlDhRvr+vgNGkCXzotNobUq9d0ke/kFOComISoaDWxV4pIBHXi4rxA5Q1WA/2X8HuC7/FagoxtsFPMtClYBslQJwc3oc+VB2MjlZWoA+1d1qXO9q91zO7M3QW8MyN6p44Z/17xpdKMH37MLWwr5zU4mp/HR8/2EAbqkus/SW8AibiI/LnM//dMJfb5EiESLs0gLSVFZoObOtDQ9Q1Q+tz04mXslNJUaLc5HDNeVICty5/T6eQa0tvm/WoP1LhKbU4hzkcFYiMZadTByGdYAdTUiQIJ84W1pAaigf9LP/dcbT+cJjx47dVF5EPFSab/1axCdffuTBsXWwCCE3FX8gOxk35KVhxvwM5EVBvrGyptwY4FiSwhUgxfypw83NsY9QJzYF8vOMVbmp6EtZSbgxPY4wZCbieztUpo27t6NepQXky8W5+EVBProbbnz8R4SnmivBUNSatpTm44f4efi0gIe/JavEEv78+uSdVQIzKysJ7+dyiOOZiZgpIwFDs5KwoaxE7LO8NPPJwkzTyfQ47LOcFBT+hqZxMFMaBz+em4ruFvEN0a+8SN4lFZnSSnjoOwIePiPIx5+vrUDXX28M//m/zdGcQBQgj73lUW8AAAEDSURBVJbkYTg/D8UE+chzknK0sKed3AwLK1saSC9xGRK7NduUU5xrFJQVmkrhuajEzFZKyS377p+6d+c2yxZxKcIv4Zn/WJyDkCV5ZlSQjzxYX23Y4PJeagX5f/aPk24SIZomyEcOCnjIoCAfGRPwELQwy/xZSZ7pT0U5xicr+PpH4cHPMzxRwjMdLsoxf1qYiaBbs83jxbnmc2UF6GPSSizRteL0Z3F0P/pfZ93oNLiJqpSSHIkQrakoNvWXF5me4ucZn+Wlm/9QVmh6qqLY3C8RorVyCRH78N6Ju13Jz/UWWP/f/3l6pRPInzSu037GRqXWnVTW8Xd56pM6h9d+boH/ByFeXw/LPeNcAAAAAElFTkSuQmCC" alt="SRMSync">
-        </span>
-        <div class="brand-info">
-          <span class="brand-text">SRM<span style="color: var(--accent);">&#128279;</span>SYNC</span>
-          <span class="brand-subtext">Alternative Portal</span>
-        </div>
-      </div>
+  <noscript>
+    <div class="noscript">SRM SYNC needs JavaScript to sign in and load your portal data. Please enable it and reload.</div>
+  </noscript>
 
-      <div class="header-actions">
-        <!-- Light / Dark Theme Switcher Button -->
-        <button id="headerThemeBtn" class="theme-toggle-btn" type="button" aria-label="Toggle Theme" title="Toggle Light / Dark Theme">
-          <svg class="theme-icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <circle cx="12" cy="12" r="5"></circle>
-            <line x1="12" y1="1" x2="12" y2="3"></line>
-            <line x1="12" y1="21" x2="12" y2="23"></line>
-            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
-            <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
-            <line x1="1" y1="12" x2="3" y2="12"></line>
-            <line x1="21" y1="12" x2="23" y2="12"></line>
-            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
-            <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
-          </svg>
-          <svg class="theme-icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
-          </svg>
-        </button>
+  <!-- Sign-in screen (rendered by js/views/login.js) -->
+  <div id="auth" class="auth" hidden></div>
 
-        <!-- Profile Photo at Hamburger Place (Top Right) -->
-        <div id="headerProfileContainer" class="header-profile-wrap" role="button" tabindex="0" title="Account" aria-expanded="false">
-          <span id="headerAvatarInner" class="header-avatar-inner">
-            <svg class="header-profile-fallback" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 4-6 8-6s8 2 8 6"/></svg>
-          </span>
-        </div>
+  <!-- Signed-in app shell (rendered by js/shell.js) -->
+  <div id="shell" class="shell" hidden>
+    <aside id="sidebar" class="sidebar"></aside>
 
-        <div id="accountMenu" class="hamburger-menu account-menu">
-          <div id="savedAccountsList" class="saved-accounts-list"></div>
-          <button class="menu-item" id="addProfileBtn" type="button">
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-            Add Profile
-          </button>
-          <button class="menu-item logout" id="accountLogoutBtn" type="button">
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
-            Logout
-          </button>
-        </div>
-      </div>
-    </div>
-  </header>
-
-  <!-- Main Page Container -->
-  <main class="page">
-
-    <!-- Top floating theme pill when on Login view -->
-    <div id="loginThemeBar" class="login-theme-bar">
-      <button id="loginThemeBtn" class="theme-toggle-pill" type="button" title="Switch Theme">
-        <svg class="theme-icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <circle cx="12" cy="12" r="5"></circle>
-          <line x1="12" y1="1" x2="12" y2="3"></line>
-          <line x1="12" y1="21" x2="12" y2="23"></line>
-          <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
-          <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
-          <line x1="1" y1="12" x2="3" y2="12"></line>
-          <line x1="21" y1="12" x2="23" y2="12"></line>
-          <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
-          <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
-        </svg>
-        <svg class="theme-icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
-        </svg>
-        <span id="themeLabelText">Light Mode</span>
-      </button>
+    <div class="shell__main">
+      <header id="topbar" class="topbar"></header>
+      <main id="view" class="view" tabindex="-1"></main>
     </div>
 
-    <!-- 1. LOGIN LEDGER SECTION -->
-    <section class="ledger">
-      <!-- Verified Stamp -->
-      <svg class="stamp-wrap" id="stamp" viewBox="0 0 100 100">
-        <g fill="none" stroke="currentColor" stroke-width="2.4">
-          <circle cx="50" cy="50" r="42"/>
-          <circle cx="50" cy="50" r="34" stroke-width="1.4"/>
-          <text x="50" y="47" text-anchor="middle" font-family="Space Grotesk, sans-serif" font-size="12" font-weight="700" fill="currentColor" stroke="none" letter-spacing="1">VERIFIED</text>
-          <text x="50" y="62" text-anchor="middle" font-family="Space Grotesk, sans-serif" font-size="7" font-weight="600" fill="currentColor" stroke="none" letter-spacing="2">SRM · AP</text>
-        </g>
-      </svg>
-
-      <p class="eyebrow">SRM Sync 2.0</p>
-      <h1>Welcome back</h1>
-      <p class="login-sub">Sign in with your SRM AP student portal account.</p>
-
-      <form id="loginForm">
-        <div class="row">
-          <label for="username">Registration No.</label>
-          <div class="input-wrapper">
-            <input id="username" name="username" type="text" placeholder="AP2XXXXXXXXXXXX" autocomplete="username" required>
-          </div>
-        </div>
-
-        <div class="row">
-          <label for="password">Password</label>
-          <div class="input-wrapper">
-            <input id="password" name="password" type="password" placeholder="••••••••" autocomplete="current-password" required>
-            <button type="button" id="togglePasswordBtn" class="password-toggle-btn" aria-label="Toggle password visibility">
-              <svg id="eyeIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
-                <circle cx="12" cy="12" r="3"></circle>
-              </svg>
-            </button>
-          </div>
-        </div>
-
-        <div class="remember-wrapper">
-          <label class="custom-checkbox">
-            <input id="rememberMe" type="checkbox">
-            <span class="checkmark">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="20 6 9 17 4 12"/></svg>
-            </span>
-          </label>
-          <label for="rememberMe" class="checkbox-label">Remember me on this device</label>
-        </div>
-
-        <div class="actions">
-          <button id="loginBtn" type="submit">Login</button>
-          <span id="status" class="status"></span>
-        </div>
-      </form>
-    </section>
-
-    <!-- 2. STUDENT PROFILE PANEL -->
-    <section id="profileSection" class="profile-panel">
-      <div class="panel-header">
-        <div>
-          <p class="eyebrow">Student Profile</p>
-          <h2 id="profileNameText">Student</h2>
-        </div>
-        <span class="panel-badge">Active Student</span>
-      </div>
-      <div id="profileContent"></div>
-      <p class="coming-soon-note">An independent, unofficial companion tool built by a student for students. It is not affiliated with or endorsed by SRM AP University. Your data is fetched live from the official portal using your own session and is not stored.</p>
-    </section>
-
-    <!-- 3. TIMETABLE PANEL -->
-    <section id="timetableSection" class="profile-panel">
-      <div class="panel-header">
-        <div>
-          <p class="eyebrow">Weekly Schedule</p>
-          <h2>Class Timetable</h2>
-        </div>
-        <span class="panel-badge" id="timetableBadge">Current Week</span>
-      </div>
-      <div class="day-selector-wrap" id="daySelectorWrap">
-        <!-- Day pill tabs dynamically generated -->
-      </div>
-      <div id="timetableContent"></div>
-    </section>
-
-    <!-- 4. COURSES & FACULTY PANEL -->
-    <section id="coursesSection" class="profile-panel">
-      <div class="panel-header">
-        <div>
-          <p class="eyebrow">Faculty & Rooms</p>
-          <h2>Courses & Faculty</h2>
-        </div>
-        <span class="panel-badge" id="coursesCountBadge">Registered Subjects</span>
-      </div>
-      <div class="courses-search-wrap">
-        <svg class="courses-search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <circle cx="11" cy="11" r="8"></circle>
-          <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-        </svg>
-        <input type="text" id="courseSearchInput" class="courses-search-input" placeholder="Search course code, subject, professor, or room..." autocomplete="off">
-      </div>
-      <div id="coursesContent"></div>
-    </section>
-
-    <!-- 5. ATTENDANCE DASHBOARD PANEL -->
-    <section id="attendanceSection" class="profile-panel">
-      <div class="panel-header">
-        <div>
-          <p class="eyebrow">Roll Call Record</p>
-          <h2>Attendance</h2>
-        </div>
-        <span class="panel-badge">Current Term</span>
-      </div>
-      <div id="attendanceContent"></div>
-    </section>
-
-    <!-- 5b. INTERNAL MARKS PANEL -->
-    <section id="internalMarksSection" class="profile-panel">
-      <div class="panel-header">
-        <div>
-          <p class="eyebrow">Continuous Assessment</p>
-          <h2>Internal Marks</h2>
-        </div>
-        <span class="panel-badge">Current Term</span>
-      </div>
-      <div id="internalMarksContent"></div>
-    </section>
-
-    <!-- 5c. CURRENT SEMESTER RESULTS PANEL -->
-    <section id="currentResultsSection" class="profile-panel">
-      <div class="panel-header">
-        <div>
-          <p class="eyebrow">Examination Results</p>
-          <h2>Current Semester Results</h2>
-        </div>
-        <span class="panel-badge" id="currentResultsSgpaBadge">SGPA</span>
-      </div>
-      <div id="currentResultsContent"></div>
-    </section>
-
-    <!-- 5d. SUBJECT FEEDBACK PANEL -->
-    <section id="feedbackSection" class="profile-panel">
-      <div class="panel-header">
-        <div>
-          <p class="eyebrow">Course Evaluation</p>
-          <h2>Feedback</h2>
-        </div>
-        <span class="panel-badge">Current Term</span>
-      </div>
-      <div id="feedbackContent"></div>
-    </section>
-
-    <!-- 6. LIVE MARK ATTENDANCE PANEL -->
-    <section id="markAttendanceSection" class="profile-panel">
-      <div class="panel-header">
-        <div>
-          <p class="eyebrow">Live Entry</p>
-          <h2>Mark Attendance</h2>
-        </div>
-        <span class="panel-badge">Direct Entry</span>
-      </div>
-
-      <form id="markAttendanceForm">
-        <label class="code-label">Enter 7-Character Attendance Code</label>
-        <div class="code-boxes-wrap" id="codeBoxesWrap">
-          <div class="code-boxes">
-            <input class="code-box code-box-letter" id="code0" type="text" maxlength="1" autocomplete="off" placeholder="A" aria-label="First Code Letter">
-            <input class="code-box" id="code1" type="text" maxlength="1" inputmode="numeric" autocomplete="off" placeholder="•" aria-label="Digit 2">
-            <input class="code-box" id="code2" type="text" maxlength="1" inputmode="numeric" autocomplete="off" placeholder="•" aria-label="Digit 3">
-            <input class="code-box" id="code3" type="text" maxlength="1" inputmode="numeric" autocomplete="off" placeholder="•" aria-label="Digit 4">
-            <input class="code-box" id="code4" type="text" maxlength="1" inputmode="numeric" autocomplete="off" placeholder="•" aria-label="Digit 5">
-            <input class="code-box" id="code5" type="text" maxlength="1" inputmode="numeric" autocomplete="off" placeholder="•" aria-label="Digit 6">
-            <input class="code-box" id="code6" type="text" maxlength="1" inputmode="numeric" autocomplete="off" placeholder="•" aria-label="Digit 7">
-          </div>
-        </div>
-
-        <div id="markAttendanceStatus" class="mark-status"></div>
-        <button id="markAttendanceBtn" class="mark-btn" type="submit">Mark Attendance</button>
-      </form>
-
-      <div id="todayAttendanceStatus" class="today-attendance-status"></div>
-    </section>
-
-  </main>
-
-<div id="profileSwitchOverlay" aria-hidden="true" role="status" aria-live="polite">
-  <div id="profileSwitchCard">
-    <div id="profileSwitchAvatar"></div>
-    <div id="profileSwitchSpinner"></div>
-    <h3 id="profileSwitchTitle">Switching profile...</h3>
-    <p id="profileSwitchMessage">Please wait while the profile loads.</p>
+    <nav id="tabbar" class="tabbar" aria-label="Primary"></nav>
   </div>
-</div>
 
-<div id="sessionExpiredOverlay" aria-hidden="true" role="status" aria-live="polite">
-  <div id="sessionExpiredCard">
-    <div id="sessionExpiredIcon">
-      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
-        <path d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
-      </svg>
-    </div>
-    <h3 id="sessionExpiredTitle">SRM Session Expired</h3>
-    <p id="sessionExpiredMessage">Your secure session with the SRM student portal has timed out. Click below to instantly establish a fresh session using your saved credentials.</p>
-    <div id="sessionExpiredActionArea">
-      <button id="sessionExpiredBtn" type="button">Initiate New Session</button>
-      <button id="sessionExpiredLogoutBtn" type="button">Log Out</button>
-    </div>
-  </div>
-</div>
+  <div id="toasts" class="toasts" role="region" aria-label="Notifications"></div>
 
-  <!-- ==========================================================================
-       BOTTOM NAVIGATION BAR (shown only while logged in; scrolls sideways)
-       ========================================================================== -->
-  <nav id="bottomNav" class="bottom-nav" aria-label="Sections">
-    <button class="bottom-nav-item" type="button" data-action="markAttendance" data-section="markAttendanceSection">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
-      <span>Mark Code</span>
-    </button>
-    <button class="bottom-nav-item" type="button" data-action="attendance" data-section="attendanceSection">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
-      <span>Attendance</span>
-    </button>
-    <button class="bottom-nav-item" type="button" data-action="feedback" data-section="feedbackSection">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-      <span>Feedback</span>
-    </button>
-    <button class="bottom-nav-item" type="button" data-action="timetable" data-section="timetableSection">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-      <span>Timetable</span>
-    </button>
-    <button class="bottom-nav-item" type="button" data-action="courses" data-section="coursesSection">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/><line x1="8" y1="6" x2="16" y2="6"/><line x1="8" y1="10" x2="14" y2="10"/></svg>
-      <span>Courses</span>
-    </button>
-    <button class="bottom-nav-item" type="button" data-action="internalMarks" data-section="internalMarksSection">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 11H3v10h6z"/><path d="M15 5H9v16h6z"/><path d="M21 3h-6v18h6z"/></svg>
-      <span>Marks</span>
-    </button>
-    <button class="bottom-nav-item" type="button" data-action="currentResults" data-section="currentResultsSection">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 15l-4-4h8z"/><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M8 8h8"/></svg>
-      <span>Results</span>
-    </button>
-    <button class="bottom-nav-item" type="button" data-action="profile" data-section="profileSection">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 4-6 8-6s8 2 8 6"/></svg>
-      <span>Profile</span>
-    </button>
-  </nav>
-
-  <!-- ==========================================================================
-       JAVASCRIPT FUNCTIONALITY & PERFORMANCE OPTIMIZATIONS
-       ========================================================================== -->
-  <!-- Link to the external JavaScript file (all page behavior lives in script.js) -->
-  <script src="script.js"></script>
-
+  <script type="module" src="js/main.js"></script>
 </body>
 </html>

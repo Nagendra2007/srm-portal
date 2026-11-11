@@ -1,0 +1,702 @@
+/* ==========================================================================
+   SRM SYNC — APP SHELL AND PAGE LAYOUTS
+   Structure only. Every colour, size and component comes from system.css.
+
+   Breakpoints
+     phone    < 768px    top bar + bottom tab bar
+     tablet   768-1099   icon rail + top bar
+     desktop  >= 1100    full sidebar + top bar
+
+   Contents
+     1. Shell (sidebar, top bar, tab bar, view)
+     2. Sign-in
+     3. Home
+     4. Attendance
+     5. Timetable week grid
+     6. Results, profile, feedback, today status
+   ========================================================================== */
+
+/* 1. SHELL ---------------------------------------------------------------- */
+.shell { min-height: 100dvh; }
+.shell__main {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 100dvh;
+}
+
+.sidebar { display: none; }
+
+.topbar {
+  position: sticky;
+  top: 0;
+  z-index: 30;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--sp-3);
+  height: calc(var(--topbar-h) + env(safe-area-inset-top));
+  padding: env(safe-area-inset-top) var(--sp-2) 0 var(--sp-4);
+  border-bottom: 1px solid var(--border);
+  background: var(--surface);
+}
+.topbar__start { display: flex; align-items: center; gap: var(--sp-3); min-width: 0; }
+.topbar__brand { flex: none; display: block; border-radius: 50%; }
+.topbar__title {
+  overflow: hidden;
+  font-size: var(--fs-lg);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.topbar__end { flex: none; display: flex; align-items: center; gap: var(--sp-1); }
+.topbar__mark { display: none; }
+
+.account-btn {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  min-width: var(--control-h);
+  min-height: var(--control-h);
+  padding: 0 var(--sp-1);
+  justify-content: center;
+  border: 0;
+  border-radius: var(--r-full);
+  background: none;
+  color: var(--text);
+  font-size: var(--fs-sm);
+  font-weight: 600;
+  cursor: pointer;
+}
+.account-btn:hover { background: var(--surface-2); }
+.account-btn__name,
+.account-btn__caret { display: none; }
+
+.view {
+  flex: 1 1 auto;
+  width: 100%;
+  max-width: 1240px;
+  margin: 0 auto;
+  padding: var(--sp-4) var(--sp-4) calc(var(--tabbar-h) + env(safe-area-inset-bottom) + var(--sp-6));
+}
+.view:focus { outline: none; }
+.page { display: grid; gap: var(--sp-4); align-content: start; min-width: 0; }
+
+.tabbar {
+  position: fixed;
+  z-index: 30;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  height: calc(var(--tabbar-h) + env(safe-area-inset-bottom));
+  padding-bottom: env(safe-area-inset-bottom);
+  border-top: 1px solid var(--border);
+  background: var(--surface);
+}
+.tabbar__item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  min-width: 0;
+  border: 0;
+  background: none;
+  color: var(--text-3);
+  font-size: 0.6875rem;
+  font-weight: 600;
+  text-decoration: none;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.tabbar__icon { display: grid; place-items: center; height: 28px; }
+.tabbar__item[aria-current="page"],
+.tabbar__item.is-active { color: var(--accent-text); }
+.tabbar__item--primary .tabbar__icon {
+  width: 52px;
+  border-radius: var(--r-full);
+  background: var(--accent);
+  color: var(--on-accent);
+}
+.tabbar__item--primary { color: var(--text-2); }
+
+.noscript { padding: var(--sp-8) var(--sp-4); text-align: center; color: var(--text-2); }
+
+/* Tablet: icon rail */
+@media (min-width: 768px) {
+  .shell {
+    display: grid;
+    grid-template-columns: var(--rail-w) minmax(0, 1fr);
+  }
+  .tabbar { display: none; }
+
+  .sidebar {
+    position: sticky;
+    top: 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-2);
+    height: 100dvh;
+    padding: var(--sp-3) var(--sp-2);
+    border-right: 1px solid var(--border);
+    background: var(--surface);
+    overflow-y: auto;
+  }
+  .sidebar__brand { justify-content: center; min-height: 44px; }
+  .sidebar__brand .brand__text { display: none; }
+  .sidebar__nav { display: grid; gap: var(--sp-2); align-content: start; }
+  .sidebar__group { display: grid; gap: 2px; }
+  .sidebar__group + .sidebar__group { padding-top: var(--sp-2); border-top: 1px solid var(--border); }
+  .sidebar__heading,
+  .sidebar__foot { display: none; }
+
+  .nav-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 3px;
+    min-height: 54px;
+    padding: var(--sp-1);
+    border-radius: var(--r-md);
+    color: var(--text-2);
+    font-size: 0.6875rem;
+    font-weight: 600;
+    line-height: 1.2;
+    text-align: center;
+    text-decoration: none;
+  }
+  .nav-item:hover { background: var(--surface-2); color: var(--text); }
+  .nav-item[aria-current="page"] { background: var(--accent-soft); color: var(--accent-text); }
+  .nav-item__label { display: none; }
+
+  .topbar { padding-left: var(--sp-6); padding-right: var(--sp-4); background: var(--bg); }
+  .topbar__brand { display: none; }
+  .topbar__title { font-size: var(--fs-xl); }
+  .topbar__end { gap: var(--sp-2); }
+  .topbar__mark { display: inline-flex; }
+  .shell[data-route="mark"] .topbar__mark { display: none; }
+
+  .view { padding: var(--sp-6); }
+  .page { gap: var(--sp-5); }
+}
+
+/* Desktop: full sidebar */
+@media (min-width: 1100px) {
+  .shell { grid-template-columns: var(--sidebar-w) minmax(0, 1fr); }
+
+  .sidebar { gap: var(--sp-4); padding: var(--sp-4) var(--sp-3); }
+  .sidebar__brand { justify-content: flex-start; padding: 0 var(--sp-2); }
+  .sidebar__brand .brand__text { display: grid; }
+  .sidebar__nav { gap: var(--sp-4); flex: 1 1 auto; }
+  .sidebar__group + .sidebar__group { padding-top: 0; border-top: 0; }
+  .sidebar__heading {
+    display: block;
+    padding: 0 var(--sp-3) var(--sp-1);
+    color: var(--text-3);
+    font-size: var(--fs-xs);
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+  }
+  .sidebar__foot {
+    display: block;
+    padding: var(--sp-3);
+    color: var(--text-3);
+    font-size: var(--fs-xs);
+    line-height: 1.5;
+  }
+
+  .nav-item {
+    flex-direction: row;
+    justify-content: flex-start;
+    gap: var(--sp-3);
+    min-height: 40px;
+    padding: 0 var(--sp-3);
+    font-size: var(--fs-md);
+    font-weight: 550;
+    text-align: left;
+  }
+  .nav-item__label { display: inline; }
+  .nav-item__short { display: none; }
+
+  .topbar { padding-left: var(--sp-8); padding-right: var(--sp-6); }
+  .account-btn { padding: 0 var(--sp-3) 0 var(--sp-1); }
+  .account-btn__name { display: block; max-width: 140px; }
+  .account-btn__caret { display: block; color: var(--text-3); }
+
+  .view { padding: var(--sp-6) var(--sp-8) var(--sp-10); }
+}
+
+/* 2. SIGN-IN -------------------------------------------------------------- */
+.auth__layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  min-height: 100dvh;
+}
+.auth__aside { display: none; }
+.auth__main {
+  display: flex;
+  flex-direction: column;
+  padding: calc(var(--sp-3) + env(safe-area-inset-top)) var(--sp-4) var(--sp-8);
+}
+.auth__bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: var(--control-h);
+}
+.auth__panel {
+  display: grid;
+  gap: var(--sp-2);
+  width: 100%;
+  max-width: 400px;
+  margin: auto;
+  padding: var(--sp-8) 0;
+}
+.auth__back { justify-self: start; margin-bottom: var(--sp-2); }
+.auth__title { font-size: var(--fs-2xl); }
+.auth__lead { color: var(--text-2); }
+.auth__form { display: grid; gap: var(--sp-4); margin-top: var(--sp-4); }
+.auth__wait { text-align: center; }
+.auth__saved { display: grid; gap: var(--sp-2); margin-top: var(--sp-5); }
+.auth__note { color: var(--text-3); font-size: var(--fs-xs); line-height: 1.6; }
+.auth__note--inline { margin-top: var(--sp-6); }
+
+@media (min-width: 960px) {
+  .auth__layout { grid-template-columns: minmax(0, 5fr) minmax(0, 6fr); }
+  .auth__aside {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    gap: var(--sp-8);
+    padding: var(--sp-10) var(--sp-12);
+    border-right: 1px solid var(--border);
+    background: var(--surface);
+  }
+  .auth__pitch { display: grid; gap: var(--sp-8); max-width: 460px; }
+  .auth__headline { font-size: var(--fs-3xl); line-height: 1.15; letter-spacing: -0.02em; }
+  .auth__points { display: grid; gap: var(--sp-5); list-style: none; }
+  .auth__point { display: flex; gap: var(--sp-4); align-items: flex-start; }
+  .auth__point strong { display: block; }
+  .auth__point .muted { display: block; font-size: var(--fs-sm); }
+  .auth__aside .auth__note { max-width: 460px; }
+  .auth__main { padding: var(--sp-6) var(--sp-8) var(--sp-10); }
+  .auth__bar { justify-content: flex-end; }
+  .auth__bar-brand,
+  .auth__note--inline { display: none; }
+}
+
+/* 3. HOME ----------------------------------------------------------------- */
+.page-intro { display: grid; gap: 2px; }
+.page-intro__title { font-size: var(--fs-xl); }
+.page-intro__sub { color: var(--text-3); }
+
+/* Phone: one column in priority order. The two wrappers dissolve so the
+   cards can be ordered independently of their desktop column. */
+.home-grid { display: flex; flex-direction: column; gap: var(--sp-4); }
+.home-main, .home-side { display: contents; }
+.home-now { order: 1; }
+.home-mark { order: 2; }
+.home-today { order: 3; }
+.home-att { order: 4; }
+.home-links { order: 5; }
+
+.now { display: grid; gap: var(--sp-2); }
+.now__status {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  color: var(--text-2);
+  font-size: var(--fs-sm);
+  font-weight: 600;
+}
+.now__status--live { color: var(--success); }
+.now__title { font-size: var(--fs-2xl); letter-spacing: -0.02em; }
+.now__meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--sp-1) var(--sp-4);
+  color: var(--text-2);
+}
+.now__meta > span { display: inline-flex; align-items: center; gap: 6px; }
+.now__progress {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+  margin-top: var(--sp-2);
+}
+.now__progress .progress { flex: 1 1 auto; }
+.now__next {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+  margin-top: var(--sp-3);
+  padding-top: var(--sp-3);
+  border-top: 1px solid var(--border);
+}
+.now__next-body {
+  flex: 1 1 auto;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0 var(--sp-3);
+  min-width: 0;
+}
+.now__next-label {
+  flex: none;
+  color: var(--text-3);
+  font-size: var(--fs-xs);
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.att-summary { display: grid; gap: var(--sp-3); }
+.home-att .att-summary { padding: var(--sp-5) var(--sp-5) var(--sp-2); }
+.att-summary__head { display: flex; flex-wrap: wrap; align-items: baseline; gap: var(--sp-1) var(--sp-3); }
+.att-summary__pct { font-size: var(--fs-2xl); font-weight: 700; letter-spacing: -0.02em; }
+.att-summary__legend { display: flex; flex-wrap: wrap; gap: var(--sp-1) var(--sp-4); color: var(--text-2); }
+.att-summary__legend > span { display: inline-flex; align-items: center; gap: 6px; }
+
+@media (max-width: 767px) {
+  .home-att .att-summary { padding: var(--sp-4) var(--sp-4) var(--sp-1); }
+  .section-label--inset { padding-left: var(--sp-4); padding-right: var(--sp-4); }
+}
+
+/* Tablet: full-width cards, with the two list cards side by side. */
+@media (min-width: 768px) {
+  .home-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    align-items: start;
+    gap: var(--sp-5);
+  }
+  .home-now, .home-mark, .home-today { grid-column: 1 / -1; }
+  .home-mark .code-form { grid-template-columns: minmax(0, 1fr) auto; align-items: end; column-gap: var(--sp-5); }
+  .home-mark .code-form [data-code-status] { grid-column: 1 / -1; grid-row: 2; }
+  .home-mark .code-form [data-code-status]:empty { display: none; }
+  .home-mark .code-form .btn { width: auto; margin-bottom: calc(var(--fs-sm) * 1.5 + var(--sp-2)); height: 52px; }
+}
+
+/* Desktop: schedule on the left, actions and status on the right. */
+@media (min-width: 1000px) {
+  .home-grid { grid-template-columns: minmax(0, 1.3fr) minmax(320px, 1fr); }
+  .home-main, .home-side { display: grid; gap: var(--sp-5); align-content: start; min-width: 0; }
+  .home-now, .home-mark, .home-today { grid-column: auto; }
+  .home-mark .code-form { grid-template-columns: minmax(0, 1fr); }
+  .home-mark .code-form [data-code-status] { grid-row: auto; }
+  .home-mark .code-form .btn { width: 100%; margin-bottom: 0; height: auto; }
+}
+
+/* 4. ATTENDANCE ----------------------------------------------------------- */
+.att-overview { padding: var(--sp-5); }
+.sort-control { display: flex; align-items: center; gap: var(--sp-2); }
+
+.att-list__head { display: none; }
+.att-item { border-bottom: 1px solid var(--border); }
+.att-item:last-child { border-bottom: 0; }
+.att-item__row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-areas:
+    "subject pct"
+    "meter meter"
+    "nums nums"
+    "margin action";
+  align-items: center;
+  gap: var(--sp-3) var(--sp-4);
+  padding: var(--sp-4);
+}
+.att-item__subject { grid-area: subject; display: grid; min-width: 0; }
+.att-item__name { font-weight: 600; }
+.att-item__meter { grid-area: meter; }
+.att-item__pct { grid-area: pct; justify-self: end; }
+.att-item__nums {
+  grid-area: nums;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--sp-2);
+}
+.att-item__nums > div {
+  padding: var(--sp-2) var(--sp-3);
+  border-radius: var(--r-md);
+  background: var(--surface-2);
+}
+.att-item__nums dt { color: var(--text-3); font-size: var(--fs-xs); }
+.att-item__nums dd { font-weight: 650; }
+.att-item__margin {
+  grid-area: margin;
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  color: var(--text-2);
+  font-size: var(--fs-sm);
+  font-weight: 600;
+}
+.att-item__action { grid-area: action; justify-self: end; }
+
+.att-plan {
+  display: grid;
+  gap: var(--sp-3);
+  padding: var(--sp-4);
+  border-top: 1px solid var(--border);
+  background: var(--surface-2);
+}
+.att-plan .segmented { justify-self: start; background: var(--surface-3); }
+.att-plan__control,
+.att-plan__result {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--sp-3);
+}
+
+@media (min-width: 900px) {
+  .att-list__head,
+  .att-item__row {
+    display: grid;
+    grid-template-columns: minmax(160px, 2.4fr) minmax(96px, 1.3fr) 76px 60px 60px 60px minmax(124px, 1fr) 88px;
+    grid-template-areas: none;
+    align-items: center;
+    gap: var(--sp-4);
+    padding: var(--sp-3) var(--sp-5);
+  }
+  .att-list__head {
+    padding-top: var(--sp-3);
+    padding-bottom: var(--sp-3);
+    border-bottom: 1px solid var(--border);
+    background: var(--surface-2);
+    color: var(--text-3);
+    font-size: var(--fs-xs);
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+  .att-list__head .is-num { text-align: right; }
+  .att-item__subject, .att-item__meter, .att-item__pct,
+  .att-item__margin, .att-item__action { grid-area: auto; }
+  .att-item__pct { justify-self: start; }
+  .att-item__nums { display: contents; }
+  .att-item__nums > div { padding: 0; background: none; text-align: right; }
+  .att-item__nums dt {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+  }
+  .att-item__nums dd { font-weight: 500; }
+
+  .att-plan {
+    grid-template-columns: auto auto auto minmax(0, 1fr);
+    align-items: center;
+    gap: var(--sp-3) var(--sp-8);
+    padding: var(--sp-4) var(--sp-5);
+  }
+  .att-plan__hint { grid-column: 1 / -1; }
+}
+
+.whatif {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sp-4) var(--sp-10);
+  border-bottom: 1px solid var(--border);
+}
+.whatif__control { display: flex; align-items: center; gap: var(--sp-3); }
+.whatif__control .label { min-width: 108px; }
+
+/* 5. TIMETABLE WEEK GRID -------------------------------------------------- */
+.week { min-width: 720px; table-layout: fixed; }
+.week thead th:first-child { width: 112px; }
+.week thead th.is-today { color: var(--accent-text); }
+.week tbody tr:hover td { background: none; }
+.week .week__period {
+  padding: var(--sp-3) var(--sp-3) var(--sp-3) var(--sp-5);
+  border-bottom: 1px solid var(--border);
+  background: var(--surface);
+  letter-spacing: 0;
+  text-transform: none;
+  vertical-align: top;
+  white-space: normal;
+}
+.week tr:last-child .week__period { border-bottom: 0; }
+.week__period-num { display: block; color: var(--text); font-size: var(--fs-sm); font-weight: 650; }
+.week__period-time { display: block; color: var(--text-3); font-size: var(--fs-xs); font-weight: 400; }
+.week .week__cell {
+  padding: var(--sp-3);
+  border-left: 1px solid var(--border);
+  vertical-align: top;
+}
+.week .week__cell.is-free { background: var(--surface-2); }
+.week .week__cell.is-today,
+.week tbody tr:hover .week__cell.is-today { background: var(--accent-soft); }
+.week__title {
+  display: -webkit-box;
+  overflow: hidden;
+  font-size: var(--fs-sm);
+  font-weight: 600;
+  line-height: 1.35;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+}
+.week__sub { display: block; margin-top: 2px; color: var(--text-3); font-size: var(--fs-xs); }
+
+/* 6. RESULTS, PROFILE, FEEDBACK, TODAY STATUS ----------------------------- */
+.result-summary {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--sp-5) var(--sp-12);
+  padding: var(--sp-5);
+}
+.result-summary__figure { display: grid; }
+.result-summary__value { font-size: var(--fs-3xl); font-weight: 700; line-height: 1.1; letter-spacing: -0.02em; }
+
+.profile-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--sp-4);
+  padding: var(--sp-5);
+}
+.profile-head__name { font-size: var(--fs-xl); }
+
+.fb-error { padding: 0 var(--sp-5) var(--sp-4); }
+.fb-count { text-align: right; }
+
+.today-status__meta {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  padding: var(--sp-4) var(--sp-5) 0;
+}
+.today-status .section-label { padding: var(--sp-4) var(--sp-5) var(--sp-1); }
+
+@media (max-width: 767px) {
+  .att-overview, .result-summary, .profile-head { padding: var(--sp-4); }
+  .today-status__meta { padding-left: var(--sp-4); padding-right: var(--sp-4); }
+  .today-status .section-label { padding-left: var(--sp-4); padding-right: var(--sp-4); }
+  .fb-error { padding-left: var(--sp-4); padding-right: var(--sp-4); }
+  .whatif__control { width: 100%; justify-content: space-between; }
+  .whatif__control .label { flex: 1 1 auto; }
+}
+
+/* 7. SMALL-SCREEN TOOLBAR BEHAVIOUR --------------------------------------- */
+.sort-control > span { flex: none; white-space: nowrap; }
+.quick-action > .grow,
+.setting > .grow { flex: 1 1 180px; }
+
+@media (max-width: 767px) {
+  .sort-control > span { display: none; }
+
+  /* Tabs and the refresh button share one line; the timestamp is dropped
+     unless it is carrying a warning, which then gets a line to itself. */
+  .page-toolbar--tabs .freshness:not(.freshness--warning) .freshness__text { display: none; }
+  .page-toolbar--tabs .freshness { flex: none; }
+  .page-toolbar--tabs .freshness--warning { order: -1; width: 100%; justify-content: space-between; text-align: left; }
+  .page-toolbar--tabs .tabs { flex: 1 1 0; min-width: 0; }
+}
+
+/* Attendance rows on tablets: counts sit beside the margin instead of
+   taking a full-width row of their own. */
+@media (min-width: 600px) and (max-width: 899px) {
+  .att-item__row {
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    grid-template-areas:
+      "subject subject pct"
+      "meter meter meter"
+      "nums margin action";
+    padding: var(--sp-4) var(--sp-5);
+  }
+  .att-item__nums { grid-template-columns: repeat(3, 88px); }
+  .att-plan { padding: var(--sp-4) var(--sp-5); }
+}
+
+/* 8. PHONE PASS ----------------------------------------------------------- 
+   Phones get their own density, not the desktop layout stacked: narrower
+   gutters, smaller headings, one-line class rows, and attendance counts as
+   inline text instead of three boxes — so the current class and the code
+   box both fit on the first screen. */
+@media (max-width: 767px) {
+  .view { padding: var(--sp-3) var(--sp-3) calc(var(--tabbar-h) + env(safe-area-inset-bottom) + var(--sp-5)); }
+  .page { gap: var(--sp-3); }
+  .topbar { padding-left: var(--sp-3); }
+  .card__header { min-height: 48px; }
+
+  .page-intro__title { font-size: var(--fs-lg); }
+  .page-intro__sub { font-size: var(--fs-sm); }
+  .home-grid { gap: var(--sp-3); }
+  .now__title { font-size: var(--fs-xl); }
+  .now__meta { font-size: var(--fs-sm); }
+  .now__progress { margin-top: var(--sp-1); }
+  .now__next { margin-top: var(--sp-2); padding-top: var(--sp-3); }
+  .home-mark .code-form { gap: var(--sp-3); }
+  .home-mark .code-form__hint { display: none; }
+  .code-box { height: 48px; }
+  .att-summary__pct { font-size: var(--fs-xl); }
+
+  .agenda__item {
+    grid-template-columns: 44px minmax(0, 1fr) auto;
+    gap: 10px;
+    min-height: 52px;
+    padding-top: 10px;
+    padding-bottom: 10px;
+  }
+  .agenda__period { display: none !important; }
+}
+
+@media (max-width: 599px) {
+  .att-item__row {
+    grid-template-areas:
+      "subject pct"
+      "meter meter"
+      "nums action"
+      "margin action";
+    gap: var(--sp-2) var(--sp-3);
+    padding: var(--sp-3) var(--sp-4);
+  }
+  .att-item__nums { display: flex; flex-wrap: wrap; gap: 2px var(--sp-4); margin-top: 2px; }
+  .att-item__nums > div {
+    display: flex;
+    align-items: baseline;
+    gap: 5px;
+    padding: 0;
+    border-radius: 0;
+    background: none;
+  }
+  .att-item__nums dt,
+  .att-item__nums dd { font-size: var(--fs-sm); }
+  .att-item__action { align-self: center; }
+}
+
+/* 9. SHRINKABLE TEXT IN PAGE LAYOUTS -------------------------------------- */
+.now__next-body > *,
+.now__meta > *,
+.now__status > *,
+.att-summary__head > *,
+.att-summary__legend > *,
+.att-item__margin > *,
+.whatif__control > *,
+.profile-head > *,
+.result-summary > *,
+.topbar__title { min-width: 0; }
+.sort-control { flex: none; }
+
+/* 10. LONG COURSE NAMES ---------------------------------------------------- */
+.now__title,
+.now__next-body > strong {
+  display: -webkit-box;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+}
+.now__title { -webkit-line-clamp: 3; line-clamp: 3; }
+.now__next-body > strong { -webkit-line-clamp: 2; line-clamp: 2; }
+@media (max-width: 767px) {
+  .agenda__item { grid-template-columns: minmax(44px, auto) minmax(0, 1fr) auto; }
+}
+.setting > .label { flex: 1 1 auto; }
